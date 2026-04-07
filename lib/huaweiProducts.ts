@@ -1,4 +1,4 @@
-import { phoneImg } from "@/lib/catalogImages";
+import { huaweiPhoneImages, imageAt } from "@/lib/catalogImages";
 
 const baseHuawei = [
   {
@@ -62,27 +62,26 @@ const baseHuawei = [
     summary:
       "A stylish nova-series Huawei phone aimed at balanced performance and visual appeal.",
   },
-  {
-    id: "watch-5",
-    name: "HUAWEI Watch 5",
-    image: "/huawei/watch-5.webp",
-    line: "Wearables",
-    price: "N 640,000",
-    summary: "A premium Huawei smartwatch with a sleek watch-first brand presentation.",
-  },
 ] as const;
 
 const extraHuawei = Array.from({ length: 22 }, (_, index) => {
   const slot = index + 9;
-  const lines = ["Mate", "Pura", "nova", "Enjoy"] as const;
+  const lines = ["Mate Series", "Pura Series", "nova Series", "Enjoy Series"] as const;
+  const names = [
+    "HUAWEI Mate Line",
+    "HUAWEI Pura Line",
+    "HUAWEI nova Line",
+    "HUAWEI Enjoy Line",
+  ] as const;
+  const name = names[index % names.length];
 
   return {
     id: `huawei-extra-${String(slot).padStart(2, "0")}`,
-    name: `HUAWEI Portfolio ${slot}`,
-    image: phoneImg(slot),
-    line: `${lines[index % lines.length]} Line`,
+    name: `${name} ${slot}`,
+    image: imageAt(huaweiPhoneImages, slot),
+    line: lines[index % lines.length],
     price: `N ${(520 + index * 15) * 1000}`,
-    summary: `HarmonyOS-ready Huawei hardware ${slot} staged for the brand catalog grid.`,
+    summary: `${name} ${slot} is shown as a Huawei phone entry with HarmonyOS-ready styling and premium hardware presentation.`,
   };
 });
 

@@ -20,6 +20,25 @@ export const getPreferredTheme = (): ThemeMode => {
     : "light";
 };
 
+export const subscribeToTheme = (onStoreChange: () => void) => {
+  if (typeof window === "undefined") {
+    return () => undefined;
+  }
+
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const handleThemeChange = () => {
+    onStoreChange();
+  };
+
+  window.addEventListener("storage", handleThemeChange);
+  mediaQuery.addEventListener("change", handleThemeChange);
+
+  return () => {
+    window.removeEventListener("storage", handleThemeChange);
+    mediaQuery.removeEventListener("change", handleThemeChange);
+  };
+};
+
 export const applyThemeClass = (theme: ThemeMode) => {
   if (typeof document === "undefined") {
     return;

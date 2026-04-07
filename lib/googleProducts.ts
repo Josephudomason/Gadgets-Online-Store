@@ -1,4 +1,4 @@
-import { phoneImg } from "@/lib/catalogImages";
+import { googlePhoneImages, imageAt } from "@/lib/catalogImages";
 
 const baseGoogle = [
   {
@@ -84,7 +84,7 @@ const extraGoogle = Array.from({ length: 22 }, (_, index) => {
   return {
     id: `google-pixel-extra-${String(slot).padStart(2, "0")}`,
     name: `Google ${series} ${slot}`,
-    image: phoneImg(slot),
+    image: imageAt(googlePhoneImages, slot),
     line: `${series} Series`,
     price: `N ${(480 + index * 14) * 1000}`,
     summary: `Google ${series} family device with Tensor-class performance and clean Android presentation.`,

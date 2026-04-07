@@ -1,5 +1,3 @@
-import { phoneImg } from "@/lib/catalogImages";
-
 type TopSaleGadget = {
   id: string;
   name: string;
@@ -9,7 +7,7 @@ type TopSaleGadget = {
   price: string;
 };
 
-const baseTopSales: TopSaleGadget[] = [
+const topSales: TopSaleGadget[] = [
   {
     id: "topsale-jbl",
     name: "JBL Speaker",
@@ -27,39 +25,62 @@ const baseTopSales: TopSaleGadget[] = [
     price: "N 240,000",
   },
   {
-    id: "topsale-samsung-s10",
-    name: "Samsung S10",
+    id: "galaxy-s25-series",
+    name: "Samsung Galaxy S25 Series",
     brand: "Samsung",
-    model: "S10",
-    image: "/products/Samsung S10 1.webp",
-    price: "N 310,000",
+    model: "Galaxy S25 Series",
+    image: "/samsung/galaxy-s25-series.webp",
+    price: "N 1,780,000",
   },
   {
-    id: "topsale-iphone-xs",
-    name: "iPhone Xs Max",
+    id: "iphone-16-pro",
+    name: "iPhone 16 Pro",
     brand: "Apple",
-    model: "Xs Max",
-    image: "/products/iphone Xsmax 256gbg 1.webp",
-    price: "N 540,000",
+    model: "iPhone 16 Pro",
+    image: "/apple/iphone-16-pro.webp",
+    price: "N 2,250,000",
+  },
+  {
+    id: "pixel-fold-1",
+    name: "Google Pixel Fold",
+    brand: "Google",
+    model: "Pixel Fold Series",
+    image: "/google/pixel-10-pro-fold-1.webp",
+    price: "N 1,650,000",
+  },
+  {
+    id: "xiaomi-15t-pro",
+    name: "Xiaomi 15T Pro",
+    brand: "Xiaomi",
+    model: "Xiaomi Series",
+    image: "/xiaomi/xiaomi-15t-pro.webp",
+    price: "N 1,420,000",
+  },
+  {
+    id: "find-x8-pro",
+    name: "OPPO Find X8 Pro",
+    brand: "OPPO",
+    model: "Find X Series",
+    image: "/oppo/find-x8-pro.webp",
+    price: "N 1,540,000",
+  },
+  {
+    id: "mate80-pro",
+    name: "HUAWEI Mate 80 Pro",
+    brand: "Huawei",
+    model: "Mate Series",
+    image: "/huawei/mate80-pro.webp",
+    price: "N 1,680,000",
+  },
+  {
+    id: "iphone-12promax-124gbg-1",
+    name: "iPhone 12 Pro Max",
+    brand: "Apple",
+    model: "iPhone 12 Pro Max",
+    image: "/products/iphone 12promax 124gbg 1.webp",
+    price: "N 1,050,000",
   },
 ];
-
-const extraTopSales: TopSaleGadget[] = Array.from({ length: 26 }, (_, index) => {
-  const slot = index + 5;
-  const brands = ["Samsung", "Apple", "Google", "Xiaomi", "Oppo", "Huawei"] as const;
-  const brand = brands[index % brands.length];
-
-  return {
-    id: `topsale-extra-${String(slot).padStart(2, "0")}`,
-    name: `${brand} Featured Pick ${slot}`,
-    brand,
-    model: `Series ${slot}`,
-    image: phoneImg(slot),
-    price: `N ${(185 + index * 12) * 1000}`,
-  };
-});
-
-const topSales: TopSaleGadget[] = [...baseTopSales, ...extraTopSales];
 
 export { topSales };
 export type { TopSaleGadget };

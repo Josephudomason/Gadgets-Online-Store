@@ -152,6 +152,7 @@ const NotificationPage = () => {
                   src={product.image}
                   alt={product.name}
                   fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 220px"
                   className="object-contain p-4 transition duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-slate-900/75 to-transparent px-3 py-2">

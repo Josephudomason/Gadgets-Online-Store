@@ -1,5 +1,3 @@
-import { phoneImg } from "@/lib/catalogImages";
-
 type SalesDiscountItem = {
   id: string;
   name: string;
@@ -9,7 +7,7 @@ type SalesDiscountItem = {
   image: string;
 };
 
-const baseSales: SalesDiscountItem[] = [
+const salesDiscount: SalesDiscountItem[] = [
   {
     id: "sd-powerbank",
     name: "Newage Powerbank",
@@ -42,24 +40,63 @@ const baseSales: SalesDiscountItem[] = [
     price: "N 68,000",
     image: "/products/Fifa Sport game 1.webp",
   },
+  {
+    id: "samsung-a03-1",
+    name: "Samsung A03",
+    brand: "Samsung",
+    model: "Samsung A03",
+    price: "N 145,000",
+    image: "/products/Samsung A03 1.webp",
+  },
+  {
+    id: "iphone-x-256-gbgb-1",
+    name: "iPhone X",
+    brand: "Apple",
+    model: "iPhone X",
+    price: "N 460,000",
+    image: "/products/Iphone X 256 Gbgb 1.webp",
+  },
+  {
+    id: "redmi-15c",
+    name: "Redmi 15C",
+    brand: "Xiaomi",
+    model: "Redmi Series",
+    price: "N 330,000",
+    image: "/xiaomi/redmi-15c.webp",
+  },
+  {
+    id: "reno13-f-5g",
+    name: "OPPO Reno13 F 5G",
+    brand: "OPPO",
+    model: "Reno Series",
+    price: "N 710,000",
+    image: "/oppo/reno13-f-5g.webp",
+  },
+  {
+    id: "nova14-pro",
+    name: "HUAWEI nova 14 Pro",
+    brand: "Huawei",
+    model: "nova Series",
+    price: "N 980,000",
+    image: "/huawei/nova14-pro.webp",
+  },
+  {
+    id: "google-pixel-ga-1",
+    name: "Google Pixel 6a",
+    brand: "Google",
+    model: "Pixel 6a",
+    price: "N 430,000",
+    image: "/products/Google pixel Ga 1.webp",
+  },
+  {
+    id: "iphone-12-gbg-1",
+    name: "iPhone 12",
+    brand: "Apple",
+    model: "iPhone 12",
+    price: "N 780,000",
+    image: "/products/iphone 12 Gbg 1.webp",
+  },
 ];
-
-const extraSales: SalesDiscountItem[] = Array.from({ length: 26 }, (_, index) => {
-  const slot = index + 5;
-  const brands = ["Samsung", "Apple", "Sony", "JBL", "Google", "Xiaomi"] as const;
-  const brand = brands[index % brands.length];
-
-  return {
-    id: `sd-extra-${String(slot).padStart(2, "0")}`,
-    name: `${brand} Clearance ${slot}`,
-    brand,
-    model: `Offer ${slot}`,
-    image: phoneImg(slot),
-    price: `N ${(95 + index * 9) * 1000}`,
-  };
-});
-
-const salesDiscount: SalesDiscountItem[] = [...baseSales, ...extraSales];
 
 export { salesDiscount };
 export type { SalesDiscountItem };

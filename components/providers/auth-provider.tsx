@@ -3,16 +3,15 @@
 import {
   createContext,
   useContext,
-  useState,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
 
 import {
-  buildVerificationCode,
   normalizeEmail,
   readAuthSession,
   readStoredUser,
+  subscribeToAuth,
   writeAuthSession,
   writeStoredUser,
   type AuthSession,
@@ -21,6 +20,10 @@ import {
 
 type SignupPayload = {
   name: string;
+  homeAddress: string;
+  phoneNumber: string;
+  gender: string;
+  age: string;
   email: string;
   password: string;
 };
@@ -33,29 +36,69 @@ type LoginPayload = {
 type AuthContextValue = {
   user: StoredUser | null;
   session: AuthSession | null;
-  verificationCode: string;
   isReady: boolean;
   isAuthenticated: boolean;
   signup: (payload: SignupPayload) => { ok: boolean; message: string };
-  verify: (code: string) => { ok: boolean; message: string };
   login: (payload: LoginPayload) => { ok: boolean; message: string };
+  updateProfile: (payload: Omit<SignupPayload, "email" | "password">) => { ok: boolean; message: string };
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const emptySubscribe = () => () => {};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const isReady = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  const [user, setUser] = useState<StoredUser | null>(() =>
-    typeof window === "undefined" ? null : readStoredUser()
+  const isReady = useSyncExternalStore(subscribeToAuth, () => true, () => false);
+  const user = useSyncExternalStore(
+    subscribeToAuth,
+    readStoredUser,
+    () => null
   );
-  const [session, setSession] = useState<AuthSession | null>(() =>
-    typeof window === "undefined" ? null : readAuthSession()
+  const session = useSyncExternalStore(
+    subscribeToAuth,
+    readAuthSession,
+    () => null
   );
-  const [verificationCode] = useState(buildVerificationCode());
+  const validateProfile = ({
+    name,
+    homeAddress,
+    phoneNumber,
+    gender,
+    age,
+  }: Omit<SignupPayload, "email" | "password">) => {
+    if (!name.trim() || !homeAddress.trim() || !phoneNumber.trim() || !gender.trim()) {
+      return "Please complete all profile fields.";
+    }
 
-  const signup = ({ name, email, password }: SignupPayload) => {
+    const numericAge = Number(age);
+
+    if (!Number.isFinite(numericAge) || numericAge < 18) {
+      return "Users must be at least 18 years old.";
+    }
+
+    return null;
+  };
+
+  const signup = ({
+    name,
+    homeAddress,
+    phoneNumber,
+    gender,
+    age,
+    email,
+    password,
+  }: SignupPayload) => {
+    const profileValidationMessage = validateProfile({
+      name,
+      homeAddress,
+      phoneNumber,
+      gender,
+      age,
+    });
+
+    if (profileValidationMessage) {
+      return { ok: false, message: profileValidationMessage };
+    }
+
     const normalizedEmail = normalizeEmail(email);
     const existingUser = readStoredUser();
 
@@ -65,36 +108,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const nextUser: StoredUser = {
       name: name.trim(),
+      homeAddress: homeAddress.trim(),
+      phoneNumber: phoneNumber.trim(),
+      gender: gender.trim(),
+      age: age.trim(),
       email: normalizedEmail,
       password,
-      verified: false,
       createdAt: new Date().toISOString(),
+    };
+    const nextSession: AuthSession = {
+      email: normalizedEmail,
+      loggedInAt: new Date().toISOString(),
     };
 
     writeStoredUser(nextUser);
-    writeAuthSession(null);
-    setUser(nextUser);
-    setSession(null);
+    writeAuthSession(nextSession);
 
-    return { ok: true, message: "Account created. Verify your email to continue." };
-  };
-
-  const verify = (code: string) => {
-    const existingUser = readStoredUser();
-
-    if (!existingUser) {
-      return { ok: false, message: "Create an account before verification." };
-    }
-
-    if (code.trim() !== verificationCode) {
-      return { ok: false, message: "Incorrect verification code." };
-    }
-
-    const nextUser = { ...existingUser, verified: true };
-    writeStoredUser(nextUser);
-    setUser(nextUser);
-
-    return { ok: true, message: "Verification completed. Please log in." };
+    return { ok: true, message: "Account created successfully." };
   };
 
   const login = ({ email, password }: LoginPayload) => {
@@ -102,10 +132,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (!existingUser) {
       return { ok: false, message: "No account found. Sign up first." };
-    }
-
-    if (!existingUser.verified) {
-      return { ok: false, message: "Verify your account before logging in." };
     }
 
     if (
@@ -121,26 +147,61 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     writeAuthSession(nextSession);
-    setUser(existingUser);
-    setSession(nextSession);
 
     return { ok: true, message: "Login successful." };
   };
 
+  const updateProfile = ({
+    name,
+    homeAddress,
+    phoneNumber,
+    gender,
+    age,
+  }: Omit<SignupPayload, "email" | "password">) => {
+    const profileValidationMessage = validateProfile({
+      name,
+      homeAddress,
+      phoneNumber,
+      gender,
+      age,
+    });
+
+    if (profileValidationMessage) {
+      return { ok: false, message: profileValidationMessage };
+    }
+
+    const existingUser = readStoredUser();
+
+    if (!existingUser) {
+      return { ok: false, message: "No account found to update." };
+    }
+
+    const nextUser: StoredUser = {
+      ...existingUser,
+      name: name.trim(),
+      homeAddress: homeAddress.trim(),
+      phoneNumber: phoneNumber.trim(),
+      gender: gender.trim(),
+      age: age.trim(),
+    };
+
+    writeStoredUser(nextUser);
+
+    return { ok: true, message: "Profile saved." };
+  };
+
   const logout = () => {
     writeAuthSession(null);
-    setSession(null);
   };
 
   const value = {
     user,
     session,
-    verificationCode,
     isReady,
-    isAuthenticated: Boolean(user?.verified && session),
+    isAuthenticated: Boolean(user && session),
     signup,
-    verify,
     login,
+    updateProfile,
     logout,
   };
 

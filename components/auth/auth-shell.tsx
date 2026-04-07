@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 
 const authLinks = [
   { href: "/signup", label: "Sign up" },
-  { href: "/verify", label: "Verify" },
   { href: "/login", label: "Log in" },
 ];
 
@@ -66,8 +65,8 @@ export const AuthShell = ({
             <p className="text-sm font-semibold">What this flow now does</p>
             <ul className="mt-3 space-y-2 text-sm text-white/80">
               <li>New users are sent to sign up first.</li>
-              <li>Unverified users are sent to verification.</li>
-              <li>Verified users without a session are sent to log in.</li>
+              <li>Sign-up creates a saved profile and active session.</li>
+              <li>Returning users can log in with the same credentials.</li>
               <li>Authenticated users land on their account page.</li>
             </ul>
           </div>

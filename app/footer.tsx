@@ -12,14 +12,22 @@ import { Separator } from "@/components/ui/separator";
 
 const Footer = () => {
   return (
-    <footer className="bg-white dark:text-black">
-      <div className="mt-10 mb-15 p-10">
-        <div className="flex justify-between mb-5 px-10 cursor-pointer">
+    <footer className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <div className="mb-15 mt-10 p-10">
+        <div className="mb-5 flex cursor-pointer justify-between px-10">
           <Link href="/#top" aria-label="Back to top">
-            <Image src="/page/logo.png" alt="logo" width={40} height={40} />
+            <Image
+              src="/page/logo.png"
+              alt="logo"
+              width={40}
+              height={40}
+              sizes="40px"
+              style={{ height: "auto" }}
+              className="w-[40px]"
+            />
           </Link>
 
-          <ul className="flex gap-20 justify-between font-bold lg:mr-120 sm:mr-50 md:mr-70 dark:text-black">
+          <ul className="flex justify-between gap-20 font-bold lg:mr-120 sm:mr-50 md:mr-70">
             <li>
               <Link href="/#top-sales">Shop</Link>
             </li>
@@ -36,8 +44,8 @@ const Footer = () => {
           <Separator className="bg-[#6B52F1]" />
         </div>
 
-        <div className="flex justify-between mt-10 px-20 text-sm  font-extralight 3 ">
-          <ul className="flex flex-col gap-2 cursor-pointer dark:text-black">
+        <div className="mt-10 flex justify-between px-20 text-sm font-extralight">
+          <ul className="flex cursor-pointer flex-col gap-2">
             <li className="font-bold text-sm">
               <Link href="/">Home</Link>
             </li>
@@ -52,7 +60,7 @@ const Footer = () => {
             </li>
           </ul>
 
-          <ul className="flex flex-col gap-2 cursor-pointer dark:text-black">
+          <ul className="flex cursor-pointer flex-col gap-2">
             <li className="font-bold">Resouces</li>
             <li>
               <Link href="/blog">Blog</Link>
@@ -65,7 +73,7 @@ const Footer = () => {
             </li>
           </ul>
 
-          <ul className="flex flex-col gap-2 cursor-pointer dark:text-black">
+          <ul className="flex cursor-pointer flex-col gap-2">
             <li className="font-bold">Contact</li>
             <li className="flex">
               <MdMarkEmailRead />

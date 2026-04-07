@@ -52,6 +52,8 @@ const BrandProductGrid = ({
                   alt={product.name}
                   width={220}
                   height={220}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 220px"
+                  unoptimized={product.image.endsWith(".gif")}
                   className="h-auto max-h-48 w-auto object-contain"
                 />
               </div>

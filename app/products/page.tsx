@@ -30,6 +30,7 @@ export default function Home() {
           alt="15% Sales Discount Banner"
           width={1200}
           height={300}
+          sizes="100vw"
           className="h-auto w-full"
         />
       </div>
@@ -111,7 +112,8 @@ export default function Home() {
                 alt="scratch"
                 width={100}
                 height={30}
-                className="mt-1 w-20 sm:w-20 md:w-24"
+                sizes="96px"
+                className="mt-1 h-auto w-20 sm:w-20 md:w-24"
               />
             </div>
 
@@ -125,7 +127,8 @@ export default function Home() {
                 alt="smiley"
                 width={100}
                 height={30}
-                className="w-10 sm:w-10 md:w-12"
+                sizes="48px"
+                className="h-auto w-10 sm:w-10 md:w-12"
               />
             </div>
 
@@ -140,6 +143,7 @@ export default function Home() {
             alt="15% Sales Discount Bannera"
             width={1200}
             height={300}
+            sizes="100vw"
           />
         </div>
       </section>
@@ -237,6 +241,7 @@ export default function Home() {
             alt="15% Sales Discount Banner"
             width={1200}
             height={300}
+            sizes="100vw"
             className="h-auto w-full"
           />
         </div>

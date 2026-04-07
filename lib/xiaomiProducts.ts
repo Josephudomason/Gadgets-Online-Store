@@ -1,4 +1,4 @@
-import { phoneImg } from "@/lib/catalogImages";
+import { imageAt, xiaomiPhoneImages } from "@/lib/catalogImages";
 
 const baseXiaomi = [
   {
@@ -75,15 +75,29 @@ const baseXiaomi = [
 
 const extraXiaomi = Array.from({ length: 22 }, (_, index) => {
   const slot = index + 9;
-  const lines = ["Xiaomi T Series", "Redmi Note", "POCO X", "Redmi A"] as const;
+  const names = [
+    "Xiaomi 14T",
+    "Xiaomi 14T Pro",
+    "Redmi Note 14",
+    "Redmi Note 14 Pro",
+    "Redmi Note 14 Pro+",
+    "Redmi 14C",
+    "Redmi A5",
+    "POCO X7",
+    "POCO X7 Pro",
+    "POCO M7 Pro",
+    "POCO C75",
+  ] as const;
+  const lines = ["Xiaomi T Series", "Redmi Note Series", "Redmi A Series", "POCO X Series"] as const;
+  const name = names[index % names.length];
 
   return {
     id: `xiaomi-extra-${String(slot).padStart(2, "0")}`,
-    name: `Xiaomi Group Device ${slot}`,
-    image: phoneImg(slot),
+    name: `${name} ${slot}`,
+    image: imageAt(xiaomiPhoneImages, slot),
     line: lines[index % lines.length],
     price: `N ${(310 + index * 13) * 1000}`,
-    summary: `Xiaomi ecosystem device ${slot} with balanced specs and modern MIUI-ready presentation.`,
+    summary: `${name} ${slot} is presented as a Xiaomi-family phone with a modern MIUI-ready design and balanced everyday performance.`,
   };
 });
 

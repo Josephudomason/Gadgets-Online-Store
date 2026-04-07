@@ -1,4 +1,4 @@
-import { phoneImg } from "@/lib/catalogImages";
+import { imageAt, oppoPhoneImages } from "@/lib/catalogImages";
 
 const baseOppo = [
   {
@@ -54,36 +54,26 @@ const baseOppo = [
     summary:
       "A more accessible OPPO Reno option with 5G connectivity and a strong modern look.",
   },
-  {
-    id: "watch-x2",
-    name: "OPPO Watch X2",
-    image: "/oppo/watch-x2.webp",
-    line: "Wearables",
-    price: "N 590,000",
-    summary:
-      "A premium OPPO smartwatch with a bold design and flagship accessory positioning.",
-  },
-  {
-    id: "watch-x2-mini",
-    name: "OPPO Watch X2 Mini",
-    image: "/oppo/watch-x2-mini.webp",
-    line: "Wearables",
-    price: "N 520,000",
-    summary: "A more compact smartwatch option in the OPPO wearables line.",
-  },
 ] as const;
 
 const extraOppo = Array.from({ length: 22 }, (_, index) => {
   const slot = index + 9;
-  const lines = ["Find X", "Reno", "A Series", "K Series"] as const;
+  const lines = ["Find X Series", "Reno Series", "A Series", "K Series"] as const;
+  const names = [
+    "OPPO Find X",
+    "OPPO Reno",
+    "OPPO A Line",
+    "OPPO K Line",
+  ] as const;
+  const name = names[index % names.length];
 
   return {
     id: `oppo-extra-${String(slot).padStart(2, "0")}`,
-    name: `OPPO Showcase ${slot}`,
-    image: phoneImg(slot),
-    line: `${lines[index % lines.length]} Family`,
+    name: `${name} ${slot}`,
+    image: imageAt(oppoPhoneImages, slot),
+    line: lines[index % lines.length],
     price: `N ${(360 + index * 12) * 1000}`,
-    summary: `OPPO ColorOS-ready handset ${slot} with refined hardware staging for the brand wall.`,
+    summary: `${name} ${slot} is presented as an OPPO phone with refined ColorOS-ready styling and a polished hardware look.`,
   };
 });
 

@@ -1,7 +1,7 @@
 import { AuthGate } from "@/components/auth/auth-gate";
 import { ProfilePageContent } from "@/components/auth/profile-page-content";
 
-const AccountPage = () => {
+const ProfilePage = () => {
   return (
     <AuthGate mode="protected">
       <ProfilePageContent />
@@ -9,4 +9,4 @@ const AccountPage = () => {
   );
 };
 
-export default AccountPage;
+export default ProfilePage;

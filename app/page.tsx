@@ -13,11 +13,9 @@ import SamsungSection from "@/components/samsung";
 
 import Image from "next/image";
 import Link from "next/link";
-import { useTheme } from "@/components/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  const { theme } = useTheme();
   const [countdown, setCountdown] = useState({
     minutes: "15",
     seconds: "00",
@@ -70,7 +68,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div id="top" className={theme === "dark" ? "bg-black" : "bg-gray-100"}>
+    <div id="top" className="bg-gray-100 dark:bg-black">
       <NavBar />
 
       {/*Banner*/}
@@ -81,14 +79,12 @@ export default function Home() {
           alt="15% Sales Discount Banner"
           width={1200}
           height={300}
+          sizes="100vw"
           className="h-auto w-full"
         />
       </div>
 
-      <main
-        className={`mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8 ${theme === "dark" ? "bg-black" : "bg-gray-100"
-          }`}
-      >
+      <main className="mx-auto flex w-full max-w-7xl flex-col gap-10 bg-gray-100 px-4 py-8 dark:bg-black sm:px-6 lg:px-8">
         {/*Categories and brands*/}
 
         <div className="-mt-15 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -144,6 +140,7 @@ export default function Home() {
             alt="15% Sales Discount Banner"
             width={1200}
             height={420}
+            sizes="(max-width: 768px) 100vw, 1200px"
             className="h-[320px] w-full object-cover md:h-[380px]"
             priority
           />
@@ -159,6 +156,8 @@ export default function Home() {
                 alt="scratch"
                 width={50}
                 height={20}
+                sizes="96px"
+                className="h-auto w-auto"
               />
             </span>
             <div className="space-y-1 text-sm sm:text-base">
@@ -170,6 +169,8 @@ export default function Home() {
                   alt="smiley"
                   width={50}
                   height={20}
+                  sizes="48px"
+                  className="h-auto w-auto"
                 />
               </span>
             </div>
@@ -352,6 +353,7 @@ export default function Home() {
             alt="15% Sales Discount Banner"
             width={1200}
             height={300}
+            sizes="100vw"
             className="h-auto w-full object-cover"
           />
         </div>

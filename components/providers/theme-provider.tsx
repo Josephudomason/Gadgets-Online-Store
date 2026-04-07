@@ -4,13 +4,14 @@ import {
   createContext,
   useContext,
   useEffect,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
 import {
   applyThemeClass,
   getPreferredTheme,
+  subscribeToTheme,
   THEME_STORAGE_KEY,
   type ThemeMode,
 } from "@/lib/theme";
@@ -23,9 +24,16 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setThemeState] = useState<ThemeMode>(() =>
-    typeof window === "undefined" ? "light" : getPreferredTheme()
+interface ThemeProviderProps {
+  children: ReactNode;
+  initialTheme?: ThemeMode;
+}
+
+const ThemeProvider = ({ children, initialTheme = "light" }: ThemeProviderProps) => {
+  const theme = useSyncExternalStore(
+    subscribeToTheme,
+    getPreferredTheme,
+    () => initialTheme
   );
 
   useEffect(() => {
@@ -33,9 +41,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   }, [theme]);
 
   const setTheme = (nextTheme: ThemeMode) => {
-    setThemeState(nextTheme);
     window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
     applyThemeClass(nextTheme);
+    window.dispatchEvent(new Event("storage"));
   };
 
   const toggleTheme = () => {
@@ -51,6 +59,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
+export { ThemeProvider };
 export const useTheme = () => {
   const context = useContext(ThemeContext);
 

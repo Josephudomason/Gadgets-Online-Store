@@ -7,6 +7,7 @@ import { NavBar } from "@/app/nav";
 import AddToCartButton from "@/components/add-to-cart-button";
 import ProductFeedback from "@/components/product-feedback";
 import RelatedProducts from "@/components/related-products";
+import { Button } from "@/components/ui/button";
 import { getProductById, getRelatedProducts, products } from "@/lib/productCatalog";
 
 type ProductPageProps = {
@@ -54,6 +55,8 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
               alt={product.name}
               width={420}
               height={420}
+              sizes="(max-width: 768px) 100vw, 420px"
+              unoptimized={product.image.endsWith(".gif")}
               className="h-auto max-h-90 w-full max-w-sm object-contain"
             />
           </div>
@@ -80,7 +83,15 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
             <p className="mt-6 text-2xl font-bold text-gray-900 dark:text-slate-50">{product.price}</p>
           ) : null}
 
-          <AddToCartButton product={product} />
+          <div className="mt-6 flex flex-wrap gap-3">
+            <AddToCartButton product={product} />
+            <Button
+              asChild
+              className="bg-violet-600 px-5 text-white hover:bg-violet-700"
+            >
+              <Link href="/checkout">Proceed to checkout</Link>
+            </Button>
+          </div>
 
           <p className="mt-6 text-base leading-7 text-gray-600 dark:text-slate-300">{product.description}</p>
 

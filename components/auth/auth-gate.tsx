@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 import { useAuth } from "@/components/providers/auth-provider";
 
-type AuthGateMode = "protected" | "signup" | "verify" | "login";
+type AuthGateMode = "protected" | "signup" | "login";
 
 const getNextUrl = (pathname: string, existingNext: string | null) => {
   const target = existingNext || (pathname && pathname !== "/" ? pathname : "");
@@ -46,11 +46,6 @@ export const AuthGate = ({
         return;
       }
 
-      if (!user.verified) {
-        router.replace(`/verify${nextUrl}`);
-        return;
-      }
-
       if (!session) {
         router.replace(`/login${nextUrl}`);
       }
@@ -59,37 +54,8 @@ export const AuthGate = ({
     }
 
     if (mode === "signup") {
-      if (!user) {
-        return;
-      }
-
-      if (!user.verified) {
-        router.replace(`/verify${nextUrl}`);
-        return;
-      }
-
-      if (!session) {
-        router.replace(`/login${nextUrl}`);
-        return;
-      }
-
-      router.replace("/account");
-      return;
-    }
-
-    if (mode === "verify") {
-      if (!user) {
-        router.replace(`/signup${nextUrl}`);
-        return;
-      }
-
-      if (user.verified && session) {
-        router.replace("/account");
-        return;
-      }
-
-      if (user.verified) {
-        router.replace(`/login${nextUrl}`);
+      if (session) {
+        router.replace("/profile");
       }
 
       return;
@@ -98,11 +64,6 @@ export const AuthGate = ({
     if (mode === "login") {
       if (!user) {
         router.replace(`/signup${nextUrl}`);
-        return;
-      }
-
-      if (!user.verified) {
-        router.replace(`/verify${nextUrl}`);
         return;
       }
 
@@ -122,19 +83,15 @@ export const AuthGate = ({
     );
   }
 
-  if (mode === "protected" && (!user || !user.verified || !session)) {
+  if (mode === "protected" && (!user || !session)) {
     return null;
   }
 
-  if (mode === "signup" && user) {
+  if (mode === "signup" && session) {
     return null;
   }
 
-  if (mode === "verify" && (!user || user.verified)) {
-    return null;
-  }
-
-  if (mode === "login" && (!user || !user.verified || session)) {
+  if (mode === "login" && (!user || session)) {
     return null;
   }
 

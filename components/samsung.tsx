@@ -36,6 +36,8 @@ const SamsungSection = ({
               alt={product.name}
               width={160}
               height={160}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 160px"
+              unoptimized={product.image.endsWith(".gif")}
               className="h-36 w-auto object-contain"
             />
           </div>

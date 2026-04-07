@@ -29,7 +29,7 @@ const LoginPage = () => {
   });
 
   const next = readNextParam();
-  const destination = next || "/account";
+  const destination = next || "/profile";
   const signupHref = next ? `/signup?next=${encodeURIComponent(next)}` : "/signup";
 
   return (
@@ -38,7 +38,7 @@ const LoginPage = () => {
       <AuthGate mode="login">
         <AuthShell
           heading="Log in to continue"
-          description="Verified users can sign in and continue to checkout or their account page. The redirect destination is preserved automatically."
+          description="Sign in with your saved account details to continue to checkout or return to your profile. The redirect destination is preserved automatically."
           activeHref="/login"
         >
           <div>

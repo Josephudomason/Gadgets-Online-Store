@@ -133,6 +133,8 @@ const Cart = () => {
                     alt={item.name}
                     width={120}
                     height={120}
+                    sizes="120px"
+                    unoptimized={item.image.endsWith(".gif")}
                     className="h-24 w-auto object-contain"
                   />
                 </div>

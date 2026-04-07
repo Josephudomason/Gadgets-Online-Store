@@ -1,4 +1,4 @@
-import { phoneImg } from "@/lib/catalogImages";
+import { imageAt, samsungPhoneImages } from "@/lib/catalogImages";
 
 type SamsungGadget = {
   id: string;
@@ -80,7 +80,7 @@ const samsungGadgets: SamsungGadget[] = [
     model: "Galaxy Z Fold 6",
     storage: "512 GB",
     price: "N 2,280,000",
-    image: phoneImg(8),
+    image: imageAt(samsungPhoneImages, 1),
   },
   {
     id: "galaxy-z-flip-6",
@@ -88,7 +88,7 @@ const samsungGadgets: SamsungGadget[] = [
     model: "Galaxy Z Flip 6",
     storage: "256 GB",
     price: "N 1,350,000",
-    image: phoneImg(9),
+    image: imageAt(samsungPhoneImages, 2),
   },
   {
     id: "galaxy-a55",
@@ -96,7 +96,7 @@ const samsungGadgets: SamsungGadget[] = [
     model: "Galaxy A55",
     storage: "128 GB",
     price: "N 385,000",
-    image: phoneImg(10),
+    image: imageAt(samsungPhoneImages, 3),
   },
   {
     id: "galaxy-a35",
@@ -104,7 +104,7 @@ const samsungGadgets: SamsungGadget[] = [
     model: "Galaxy A35",
     storage: "128 GB",
     price: "N 295,000",
-    image: phoneImg(11),
+    image: imageAt(samsungPhoneImages, 4),
   },
   {
     id: "galaxy-s23-fe",
@@ -112,7 +112,7 @@ const samsungGadgets: SamsungGadget[] = [
     model: "Galaxy S23 FE",
     storage: "256 GB",
     price: "N 980,000",
-    image: phoneImg(12),
+    image: imageAt(samsungPhoneImages, 5),
   },
   {
     id: "galaxy-m55",
@@ -120,7 +120,7 @@ const samsungGadgets: SamsungGadget[] = [
     model: "Galaxy M55",
     storage: "256 GB",
     price: "N 410,000",
-    image: phoneImg(13),
+    image: imageAt(samsungPhoneImages, 6),
   },
   {
     id: "galaxy-f55",
@@ -128,39 +128,7 @@ const samsungGadgets: SamsungGadget[] = [
     model: "Galaxy F55",
     storage: "256 GB",
     price: "N 365,000",
-    image: phoneImg(14),
-  },
-  {
-    id: "galaxy-tab-s9",
-    name: "Samsung Galaxy Tab S9",
-    model: "Galaxy Tab S9",
-    storage: "256 GB",
-    price: "N 890,000",
-    image: phoneImg(15),
-  },
-  {
-    id: "galaxy-buds-3-pro",
-    name: "Samsung Galaxy Buds3 Pro",
-    model: "Galaxy Buds3 Pro",
-    storage: null,
-    price: "N 185,000",
-    image: phoneImg(16),
-  },
-  {
-    id: "galaxy-watch-7",
-    name: "Samsung Galaxy Watch 7",
-    model: "Galaxy Watch 7",
-    storage: null,
-    price: "N 310,000",
-    image: phoneImg(17),
-  },
-  {
-    id: "galaxy-fit-3",
-    name: "Samsung Galaxy Fit 3",
-    model: "Galaxy Fit 3",
-    storage: null,
-    price: "N 95,000",
-    image: phoneImg(18),
+    image: imageAt(samsungPhoneImages, 7),
   },
   {
     id: "galaxy-xcover-7",
@@ -168,20 +136,88 @@ const samsungGadgets: SamsungGadget[] = [
     model: "Galaxy XCover 7",
     storage: "128 GB",
     price: "N 520,000",
-    image: phoneImg(19),
+    image: imageAt(samsungPhoneImages, 8),
   },
-  ...Array.from({ length: 10 }, (_, index) => {
-    const slot = index + 21;
-
-    return {
-      id: `samsung-line-${slot}`,
-      name: `Samsung Galaxy Line ${slot}`,
-      model: `Galaxy ${slot}`,
-      storage: index % 2 === 0 ? "256 GB" : "128 GB",
-      price: `N ${(320 + index * 15) * 1000}`,
-      image: phoneImg(slot),
-    };
-  }),
+  {
+    id: "samsung-line-21",
+    name: "Samsung Galaxy Line 21",
+    model: "Galaxy 21",
+    storage: null,
+    price: "N 320000",
+    image: "/products/Samsung S10 1.webp",
+  },
+  {
+    id: "samsung-line-22",
+    name: "Samsung Galaxy Line 22",
+    model: "Galaxy 22",
+    storage: null,
+    price: "N 335000",
+    image: "/products/Galaxy Note 9 1.webp",
+  },
+  {
+    id: "samsung-line-23",
+    name: "Samsung Galaxy Line 23",
+    model: "Galaxy 23",
+    storage: null,
+    price: "N 350000",
+    image: "/products/Galaxy Note 10+ 1.webp",
+  },
+  {
+    id: "samsung-line-24",
+    name: "Samsung Galaxy Line 24",
+    model: "Galaxy 24",
+    storage: null,
+    price: "N 365000",
+    image: "/samsung/galaxy-s24-fe.gif",
+  },
+  {
+    id: "samsung-line-25",
+    name: "Samsung Galaxy Line 25",
+    model: "Galaxy 25",
+    storage: null,
+    price: "N 380000",
+    image: "/samsung/galaxy-s25-series.webp",
+  },
+  {
+    id: "samsung-line-26",
+    name: "Samsung Galaxy Line 26",
+    model: "Galaxy 26",
+    storage: null,
+    price: "N 395000",
+    image: "/samsung/galaxy-s26-series.webp",
+  },
+  {
+    id: "samsung-line-27",
+    name: "Samsung Galaxy Line 27",
+    model: "Galaxy 27",
+    storage: null,
+    price: "N 410000",
+    image: "/products/Samsung A03 1.webp",
+  },
+  {
+    id: "samsung-line-28",
+    name: "Samsung Galaxy Line 28",
+    model: "Galaxy 28",
+    storage: null,
+    price: "N 425000",
+    image: "/products/Samsung S10 1.webp",
+  },
+  {
+    id: "samsung-line-29",
+    name: "Samsung Galaxy Line 29",
+    model: "Galaxy 29",
+    storage: null,
+    price: "N 440000",
+    image: "/samsung/galaxy-s25-fe.webp",
+  },
+  {
+    id: "samsung-line-30",
+    name: "Samsung Galaxy Line 30",
+    model: "Galaxy 30",
+    storage: null,
+    price: "N 455000",
+    image: "/samsung/galaxy-s26-series.webp",
+  },
 ];
 
 export { samsungGadgets };

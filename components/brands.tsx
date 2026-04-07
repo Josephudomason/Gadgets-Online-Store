@@ -36,11 +36,14 @@ const Brands = ({
     <div className="space-y-4">
       <div className="grid w-full grid-cols-4 gap-4 p-2 sm:grid-cols-3 lg:grid-cols-6">
         {visibleBrands.map((brand) => (
-          <div key={brand.brandName} className="min-h-10 rounded-xl bg-white p-3 text-center dark:bg-slate-900">
+          <div
+            key={brand.brandName}
+            className="min-h-10 rounded-xl bg-white p-3 text-center text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white"
+          >
             <div className="flex flex-col items-center justify-center">
               <div
-                className={`flex h-14 w-14 items-center justify-center rounded-md border border-gray-300 p-2 dark:border-slate-700 ${
-                  brand.brandName === "Infinix" ? "bg-slate-950" : ""
+                className={`flex h-14 w-14 items-center justify-center rounded-md border border-slate-200 bg-slate-50 p-2 dark:border-white/15 dark:bg-white/10 ${
+                  brand.brandName === "Infinix" ? "dark:bg-slate-950" : ""
                 }`}
               >
                 {brand.href ? (
@@ -53,6 +56,7 @@ const Brands = ({
                       alt={brand.brandName}
                       width={56}
                       height={56}
+                      sizes="56px"
                       className="max-h-full max-w-full object-contain transition hover:scale-105"
                     />
                   </Link>
@@ -62,11 +66,12 @@ const Brands = ({
                     alt={brand.brandName}
                     width={56}
                     height={56}
+                    sizes="56px"
                     className="max-h-full max-w-full object-contain"
                   />
                 )}
               </div>
-              <p className="mt-2 text-xs font-medium leading-tight text-gray-700 dark:text-slate-200">
+              <p className="mt-2 text-xs font-medium leading-tight text-slate-900 dark:text-white">
                 {brand.brandName}
               </p>
             </div>

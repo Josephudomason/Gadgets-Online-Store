@@ -57,7 +57,7 @@ export const footerPages = {
         heading: "How we are growing",
         body: [
           "The storefront is being built to support stronger product detail pages, better account tools, and a more complete post-purchase experience over time.",
-          "As the platform matures, we plan to deepen verification, account management, delivery information, and support workflows across the customer journey.",
+          "As the platform matures, we plan to deepen account management, delivery information, and support workflows across the customer journey.",
         ],
       },
     ],
@@ -83,7 +83,7 @@ export const footerPages = {
         heading: "Where we are headed",
         body: [
           "Our story is still being written through better account tools, clearer support pages, and richer product experiences that help people choose the right gadget faster.",
-          "Over time, this foundation can grow into a more complete store with live inventory, verified user accounts, shipping updates, and stronger customer support systems.",
+          "Over time, this foundation can grow into a more complete store with live inventory, saved user accounts, shipping updates, and stronger customer support systems.",
         ],
       },
     ],
@@ -101,7 +101,7 @@ export const footerPages = {
       {
         heading: "Ordering and payments",
         body: [
-          "You can browse products freely, but account access and checkout are protected so customers complete signup, verification, and login before placing an order.",
+          "You can browse products freely, but account access and checkout are protected so customers complete signup and login before placing an order.",
           "Payment methods shown in checkout are currently part of the storefront prototype and can be extended with live payment integrations later.",
         ],
       },
@@ -185,7 +185,7 @@ export const footerPages = {
       {
         heading: "Information we handle",
         body: [
-          "Account flows may collect basic customer information such as name, email address, and authentication status to support signup, verification, and login.",
+          "Account flows may collect basic customer information such as name, email address, and authentication status to support signup and login.",
           "As checkout and order management expand, additional details like delivery information and purchase history may be used to complete transactions and customer support.",
         ],
       },
