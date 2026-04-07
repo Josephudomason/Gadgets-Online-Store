@@ -1,17 +1,7 @@
-import React from 'react'
-import { NavBar } from '../nav'
-import Footer from '../footer'
+import { redirect } from "next/navigation";
 
-const page = () => {
-  return (
-    <main >
-      <NavBar />
-      <section className='min-h-screen'>
-        <h2>Welcome to the Info Page</h2>
-      </section>
-      <Footer />
-    </main>
-  )
-}
+const InfoIndexPage = () => {
+  redirect("/products");
+};
 
-export default page
+export default InfoIndexPage;

@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bell,
+  ChevronLeft,
+  ChevronRight,
   Menu,
   Moon,
   Search,
@@ -15,12 +18,55 @@ import {
 } from "lucide-react";
 
 import { useTheme } from "@/components/providers/theme-provider";
+import { CART_STORAGE_KEY, type CartItem } from "@/lib/cart";
 
 export const NavBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const { theme, toggleTheme } = useTheme();
+  const router = useRouter();
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const syncHistoryState = () => {
+      setCanGoBack(window.history.length > 1);
+    };
+
+    syncHistoryState();
+    window.addEventListener("popstate", syncHistoryState);
+
+    return () => {
+      window.removeEventListener("popstate", syncHistoryState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const syncCartCount = () => {
+      const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
+      const cartItems = storedCart ? (JSON.parse(storedCart) as CartItem[]) : [];
+      const nextCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+      setCartCount(nextCount);
+    };
+
+    syncCartCount();
+    window.addEventListener("storage", syncCartCount);
+    window.addEventListener("focus", syncCartCount);
+
+    return () => {
+      window.removeEventListener("storage", syncCartCount);
+      window.removeEventListener("focus", syncCartCount);
+    };
+  }, []);
 
   return (
     <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#5a45db] text-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
@@ -65,13 +111,38 @@ export const NavBar = () => {
           </div>
 
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <div className="hidden items-center gap-2 lg:flex">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                disabled={!canGoBack}
+                aria-label="Go back"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.forward()}
+                aria-label="Go forward"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
 
             <Link
               href="/cart"
               aria-label="Cart"
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20 sm:inline-flex"
+              className="relative hidden h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20 sm:inline-flex"
             >
               <ShoppingBag size={18} />
+              {cartCount > 0 ? (
+                <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                  {cartCount}
+                </span>
+              ) : null}
             </Link>
 
             <Link
@@ -151,14 +222,46 @@ export const NavBar = () => {
 
         {isMobileMenuOpen ? (
           <div className="mt-4 rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur lg:hidden">
+            <div className="mb-3 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  router.back();
+                  closeMobileMenu();
+                }}
+                disabled={!canGoBack}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-3 py-3 text-sm font-medium transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ChevronLeft size={18} />
+                <span>Back</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  router.forward();
+                  closeMobileMenu();
+                }}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-3 py-3 text-sm font-medium transition hover:bg-white/15"
+              >
+                <ChevronRight size={18} />
+                <span>Forward</span>
+              </button>
+            </div>
+
             <div className="grid grid-cols-3 gap-3">
               <Link
                 href="/cart"
                 onClick={closeMobileMenu}
-                className="flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-3 py-4 text-sm font-medium transition hover:bg-white/15"
+                className="relative flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-3 py-4 text-sm font-medium transition hover:bg-white/15"
               >
                 <ShoppingBag size={18} />
                 <span className="mt-2">Cart</span>
+                {cartCount > 0 ? (
+                  <span className="absolute right-2 top-2 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                    {cartCount}
+                  </span>
+                ) : null}
               </Link>
 
               <Link

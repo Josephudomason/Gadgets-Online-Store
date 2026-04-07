@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import CartCornerIcon from "@/components/cart-corner-icon";
 import { topSales } from "@/lib/topSales";
 import { getProductHref } from "@/lib/productCatalog";
 import ProductSectionGrid from "@/components/product-section-grid";
@@ -26,9 +27,10 @@ const TopSalesSection = ({
       renderItem={(product) => (
         <Link
           href={getProductHref(product)}
-          className="block overflow-hidden rounded-xl bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          className="relative block overflow-hidden rounded-xl bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:bg-slate-900"
         >
-          <div className="mb-3 flex justify-center rounded-lg bg-gray-50 p-4">
+          <CartCornerIcon />
+          <div className="mb-3 flex justify-center rounded-lg bg-gray-50 p-4 dark:bg-slate-950">
             <Image
               src={product.image}
               alt={product.name}
@@ -42,9 +44,9 @@ const TopSalesSection = ({
             <p className="text-xs font-medium uppercase tracking-wide text-violet-600">
               {product.brand}
             </p>
-            <h3 className="text-sm font-semibold text-gray-900">{product.name}</h3>
-            <p className="text-sm text-gray-500">{product.model}</p>
-            <p className="pt-1 text-base font-bold text-gray-900">{product.price}</p>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{product.name}</h3>
+            <p className="text-sm text-gray-500 dark:text-slate-400">{product.model}</p>
+            <p className="pt-1 text-base font-bold text-gray-900 dark:text-slate-100">{product.price}</p>
           </div>
         </Link>
       )}

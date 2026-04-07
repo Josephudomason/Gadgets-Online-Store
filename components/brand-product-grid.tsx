@@ -1,7 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { Fragment, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
+
+import CartCornerIcon from "@/components/cart-corner-icon";
+import { getProductHref } from "@/lib/productCatalog";
 
 type BrandProduct = {
   id: string;
@@ -35,8 +39,13 @@ const BrandProductGrid = ({
     <div className="space-y-6">
       <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {visible.map((product) => (
-          <Fragment key={product.id}>
-            <article className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
+          <Link
+            key={product.id}
+            href={getProductHref(product)}
+            className="relative block rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-950"
+          >
+            <article>
+              <CartCornerIcon />
               <div className="flex h-56 items-center justify-center rounded-2xl bg-slate-50 p-4 dark:bg-slate-900">
                 <Image
                   src={product.image}
@@ -64,7 +73,7 @@ const BrandProductGrid = ({
                 </p>
               </div>
             </article>
-          </Fragment>
+          </Link>
         ))}
       </section>
       {canToggle ? (

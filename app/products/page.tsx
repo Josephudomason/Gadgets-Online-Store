@@ -1,3 +1,7 @@
+"use client";
+
+import Image from "next/image";
+import { useState } from "react";
 import { NavBar } from "../nav";
 import Footer from "../footer";
 
@@ -11,17 +15,22 @@ import AppleSection from "@/components/apple";
 import SamsungSection from "@/components/samsung";
 
 export default function Home() {
+  const [expandedSections, setExpandedSections] = useState({
+    categories: false,
+    brands: false,
+  });
+
   return (
-    <div className="bg-gray-100">
+    <div className="bg-gray-100 dark:bg-slate-950 dark:text-slate-50">
       <NavBar />
 
       <div className="w-full">
-        <img
+        <Image
           src="/page/main.webp"
           alt="15% Sales Discount Banner"
           width={1200}
           height={300}
-          style={{ width: "100%", height: "auto" }}
+          className="h-auto w-full"
         />
       </div>
 
@@ -31,27 +40,57 @@ export default function Home() {
 
       {/*Categories and brands */}
 
-      <section className="w-full bg-gray-100 px-4 md:px-10">
+      <section className="w-full bg-gray-100 px-4 dark:bg-slate-950 md:px-10">
         <div className="-mt-5 flex flex-col gap-6 lg:flex-row lg:justify-between">
-          <div className="flex w-full flex-col rounded-md bg-white shadow-md lg:max-w-lg">
+          <div className="flex w-full flex-col rounded-md bg-white shadow-md dark:bg-slate-900 lg:max-w-lg">
             <div className="flex justify-between w-full px-4 py-2  ">
               <p className="font-bold">shop by category</p>
-              <p className="text-violet-600">see more</p>
+              <button
+                type="button"
+                onClick={() =>
+                  setExpandedSections((prev) => ({
+                    ...prev,
+                    categories: !prev.categories,
+                  }))
+                }
+                className="text-violet-600"
+              >
+                {expandedSections.categories ? "show less" : "see more"}
+              </button>
             </div>
-            <div>
-              <Categories />
-            </div>
+            <Categories
+              expanded={expandedSections.categories}
+              onExpandedChange={(expanded) =>
+                setExpandedSections((prev) => ({ ...prev, categories: expanded }))
+              }
+              showToggleButton={false}
+            />
           </div>
 
 
-          <div className="flex w-full flex-col rounded-md bg-white shadow-md lg:max-w-lg">
+          <div className="flex w-full flex-col rounded-md bg-white shadow-md dark:bg-slate-900 lg:max-w-lg">
             <div className="flex justify-between gap-5 px-4 py-2 ">
               <p className="font-bold">shop by brand</p>
-              <p className="text-violet-600">see more</p>
+              <button
+                type="button"
+                onClick={() =>
+                  setExpandedSections((prev) => ({
+                    ...prev,
+                    brands: !prev.brands,
+                  }))
+                }
+                className="text-violet-600"
+              >
+                {expandedSections.brands ? "show less" : "see more"}
+              </button>
             </div>
-            <div>
-              <Brands />
-            </div>
+            <Brands
+              expanded={expandedSections.brands}
+              onExpandedChange={(expanded) =>
+                setExpandedSections((prev) => ({ ...prev, brands: expanded }))
+              }
+              showToggleButton={false}
+            />
           </div>
 
         </div>
@@ -67,7 +106,7 @@ export default function Home() {
             <div className="font-serif text-xl font-bold leading-tight sm:text-xl md:text-2xl">
               <p>15% Sales</p>
               <p>Discount.</p>
-              <img
+              <Image
                 src="/page/scratch.webp"
                 alt="scratch"
                 width={100}
@@ -81,7 +120,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-1 text-xs font-mono sm:text-xs md:text-sm">
               <p>our clearance sales...</p>
-              <img
+              <Image
                 src="/page/smiley.webp"
                 alt="smiley"
                 width={100}
@@ -95,13 +134,12 @@ export default function Home() {
             </Button>
           </div>
 
-          <img
+          <Image
             className="h-55 w-full object-cover object-center sm:h-auto"
             src="/page/advert1.webp"
             alt="15% Sales Discount Bannera"
             width={1200}
             height={300}
-            style={{ width: "100%" }}
           />
         </div>
       </section>
@@ -111,9 +149,9 @@ export default function Home() {
 
 
       {/*Gadgets 1*/}
-      <section className="bg-white">
+      <section className="bg-white dark:bg-slate-900">
         <div className="flex justify-between mt-25">
-          <h1>Top selling items</h1>
+          <h1 className="font-bold text-gray-900 dark:text-white">Top selling items</h1>
           <h1 className="text-violet-600">see more</h1>
         </div>
 
@@ -124,9 +162,9 @@ export default function Home() {
 
 
       {/*Gadgets 2*/}
-      <section className="bg-white">
+      <section className="bg-white dark:bg-slate-900">
         <div className="flex justify-between mt-25">
-          <h1>Recommended for you</h1>
+          <h1 className="font-bold text-gray-900 dark:text-white">Recommended for you</h1>
           <h1 className="text-violet-600">see more</h1>
         </div>
 
@@ -136,13 +174,13 @@ export default function Home() {
       </section>
 
       {/*Gadgets 3*/}
-      <section className="bg-white">
+      <section className="bg-white dark:bg-slate-900">
         <div className="flex justify-between mt-25">
           <div className="flex">
-            <h1 className="gap-x-2">15% Sales Discount</h1>
+            <h1 className="gap-x-2 font-bold text-gray-900 dark:text-white">15% Sales Discount</h1>
 
             <div className="flex">
-              Ends in
+              <span className="font-bold text-gray-900 dark:text-white">Ends in</span>
               <div className="bg-red-500">
 
                 <span>
@@ -167,9 +205,9 @@ export default function Home() {
 
 
       {/*Iphone Gadgets*/}
-      <section className="bg-white">
+      <section className="bg-white dark:bg-slate-900">
         <div className="flex justify-between mt-25">
-          <h1>Apple Iphones </h1>
+          <h1 className="font-bold text-gray-900 dark:text-white">Apple Iphones </h1>
           <h1 className="text-violet-600">see more</h1>
         </div>
 
@@ -181,9 +219,9 @@ export default function Home() {
 
 
       {/*Samsung Gadgets*/}
-      <section className="bg-white">
+      <section className="bg-white dark:bg-slate-900">
         <div className="flex justify-between mt-25">
-          <h1>Samsung Phones</h1>
+          <h1 className="font-bold text-gray-900 dark:text-white">Samsung Phones</h1>
           <h1 className="text-violet-600">see more</h1>
         </div>
 
@@ -194,12 +232,12 @@ export default function Home() {
 
       <section>
         <div>
-          <img
+          <Image
             src="/page/advert2.webp"
             alt="15% Sales Discount Banner"
             width={1200}
             height={300}
-            style={{ width: "100%", height: "auto" }}
+            className="h-auto w-full"
           />
         </div>
       </section>

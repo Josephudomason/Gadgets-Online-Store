@@ -50,7 +50,7 @@ const ProductSectionGrid = <T,>({
           <button
             type="button"
             onClick={handleToggle}
-            className="rounded-full border border-violet-200 bg-white px-6 py-2 text-sm font-semibold text-violet-700 shadow-sm transition hover:bg-violet-50"
+            className="rounded-full border border-violet-200 bg-white px-6 py-2 text-sm font-semibold text-violet-700 shadow-sm transition hover:bg-violet-50 dark:border-violet-800 dark:bg-slate-900 dark:text-violet-300 dark:hover:bg-slate-800"
           >
             {isExpanded ? "Show less" : "See more"}
           </button>

@@ -12,14 +12,14 @@ import { Separator } from "@/components/ui/separator";
 
 const Footer = () => {
   return (
-    <footer className="bg-white">
+    <footer className="bg-white dark:text-black">
       <div className="mt-10 mb-15 p-10">
         <div className="flex justify-between mb-5 px-10 cursor-pointer">
-          <Link href="/" aria-label="Pristine Gadgets home">
+          <Link href="/#top" aria-label="Back to top">
             <Image src="/page/logo.png" alt="logo" width={40} height={40} />
           </Link>
 
-          <ul className="flex gap-20 justify-between font-bold lg:mr-120 sm:mr-50 md:mr-70">
+          <ul className="flex gap-20 justify-between font-bold lg:mr-120 sm:mr-50 md:mr-70 dark:text-black">
             <li>
               <Link href="/#top-sales">Shop</Link>
             </li>
@@ -37,7 +37,7 @@ const Footer = () => {
         </div>
 
         <div className="flex justify-between mt-10 px-20 text-sm  font-extralight 3 ">
-          <ul className="flex flex-col gap-2 cursor-pointer">
+          <ul className="flex flex-col gap-2 cursor-pointer dark:text-black">
             <li className="font-bold text-sm">
               <Link href="/">Home</Link>
             </li>
@@ -52,7 +52,7 @@ const Footer = () => {
             </li>
           </ul>
 
-          <ul className="flex flex-col gap-2 cursor-pointer">
+          <ul className="flex flex-col gap-2 cursor-pointer dark:text-black">
             <li className="font-bold">Resouces</li>
             <li>
               <Link href="/blog">Blog</Link>
@@ -65,7 +65,7 @@ const Footer = () => {
             </li>
           </ul>
 
-          <ul className="flex flex-col gap-2 cursor-pointer">
+          <ul className="flex flex-col gap-2 cursor-pointer dark:text-black">
             <li className="font-bold">Contact</li>
             <li className="flex">
               <MdMarkEmailRead />

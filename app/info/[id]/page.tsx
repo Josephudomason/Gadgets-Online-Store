@@ -5,7 +5,9 @@ import { notFound } from "next/navigation";
 import Footer from "@/app/footer";
 import { NavBar } from "@/app/nav";
 import AddToCartButton from "@/components/add-to-cart-button";
-import { getProductById, products } from "@/lib/productCatalog";
+import ProductFeedback from "@/components/product-feedback";
+import RelatedProducts from "@/components/related-products";
+import { getProductById, getRelatedProducts, products } from "@/lib/productCatalog";
 
 type ProductPageProps = {
   params: Promise<{ id: string }>;
@@ -24,15 +26,17 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
     notFound();
   }
 
+  const relatedProducts = getRelatedProducts(product);
+
   return (
-    <main className="min-h-screen bg-gray-100">
+    <main className="min-h-screen bg-gray-100 dark:bg-slate-950 dark:text-slate-50">
       <NavBar />
 
       <section className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-[1.05fr_1fr] md:px-8">
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900">
           <div className="mb-6 flex items-center justify-between">
             <Link
-              href="/"
+              href="/products"
               className="text-sm font-medium text-violet-600 transition hover:text-violet-700"
             >
               Back to products
@@ -44,7 +48,7 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
             ) : null}
           </div>
 
-          <div className="flex min-h-80 items-center justify-center rounded-2xl bg-gray-50 p-6">
+          <div className="flex min-h-80 items-center justify-center rounded-2xl bg-gray-50 p-6 dark:bg-slate-950">
             <Image
               src={product.image}
               alt={product.name}
@@ -55,49 +59,64 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-600">
             Product details
           </p>
-          <h1 className="mt-3 text-3xl font-bold text-gray-900">{product.name}</h1>
+          <h1 className="mt-3 text-3xl font-bold text-gray-900 dark:text-slate-50">{product.name}</h1>
 
-          <div className="mt-4 flex flex-wrap gap-3 text-sm text-gray-600">
-            <span className="rounded-full bg-gray-100 px-3 py-1">
+          <div className="mt-4 flex flex-wrap gap-3 text-sm text-gray-600 dark:text-slate-300">
+            <span className="rounded-full bg-gray-100 px-3 py-1 dark:bg-slate-950">
               Model: {product.model}
             </span>
             {product.storage ? (
-              <span className="rounded-full bg-gray-100 px-3 py-1">
+              <span className="rounded-full bg-gray-100 px-3 py-1 dark:bg-slate-950">
                 Storage: {product.storage}
               </span>
             ) : null}
           </div>
 
           {product.price ? (
-            <p className="mt-6 text-2xl font-bold text-gray-900">{product.price}</p>
+            <p className="mt-6 text-2xl font-bold text-gray-900 dark:text-slate-50">{product.price}</p>
           ) : null}
 
           <AddToCartButton product={product} />
 
-          <p className="mt-6 text-base leading-7 text-gray-600">{product.description}</p>
+          <p className="mt-6 text-base leading-7 text-gray-600 dark:text-slate-300">{product.description}</p>
 
           <div className="mt-8">
-            <h2 className="text-lg font-semibold text-gray-900">Specifications</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-50">Specifications</h2>
             <div className="mt-4 space-y-3">
               {Object.entries(product.Specifications).map(([label, value]) => (
                 <div
                   key={label}
-                  className="flex flex-col gap-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <span className="text-sm font-medium capitalize text-gray-500">
+                  <span className="text-sm font-medium capitalize text-gray-500 dark:text-slate-400">
                     {label.replace(/([A-Z])/g, " $1")}
                   </span>
-                  <span className="text-sm text-gray-900">{value}</span>
+                  <span className="text-sm text-gray-900 dark:text-slate-100">{value}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </section>
+
+      <ProductFeedback productId={product.id} productName={product.name} />
+
+      {relatedProducts.length > 0 ? (
+        <section className="mx-auto max-w-6xl px-4 pb-10 md:px-8">
+          <div className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900 sm:p-6">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-slate-50">
+                Related products
+              </h2>
+            </div>
+            <RelatedProducts products={relatedProducts} />
+          </div>
+        </section>
+      ) : null}
 
       <Footer />
     </main>

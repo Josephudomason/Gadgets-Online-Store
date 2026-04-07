@@ -23,7 +23,7 @@ const noticeGroups: NoticeGroup[] = [
       "Bundled charger and case promo gaining traction",
       "Premium headphones reduced for 48-hour clearance",
     ],
-    tone: "border-emerald-200 bg-emerald-50",
+    tone: "border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40",
   },
   {
     id: "top-sales",
@@ -35,7 +35,7 @@ const noticeGroups: NoticeGroup[] = [
       "iPhone refurbished line remains top revenue segment",
       "Mid-range gaming phones driving repeat purchases",
     ],
-    tone: "border-sky-200 bg-sky-50",
+    tone: "border-sky-200 bg-sky-50 dark:border-sky-900 dark:bg-sky-950/40",
   },
   {
     id: "new-added",
@@ -48,7 +48,7 @@ const noticeGroups: NoticeGroup[] = [
       "New Redmi 5G variants now available for browsing",
       "Foldable showcase section refreshed with latest models",
     ],
-    tone: "border-violet-200 bg-violet-50",
+    tone: "border-violet-200 bg-violet-50 dark:border-violet-900 dark:bg-violet-950/40",
   },
   {
     id: "trending",
@@ -61,7 +61,7 @@ const noticeGroups: NoticeGroup[] = [
       "Portable speakers and audio bundles trending upward",
       "Affordable 5G devices seeing sustained clicks and saves",
     ],
-    tone: "border-fuchsia-200 bg-fuchsia-50",
+    tone: "border-fuchsia-200 bg-fuchsia-50 dark:border-fuchsia-900 dark:bg-fuchsia-950/40",
   },
   {
     id: "out-of-stock",
@@ -73,7 +73,7 @@ const noticeGroups: NoticeGroup[] = [
       "Best-selling color options currently unavailable",
       "High-demand budget devices awaiting supplier update",
     ],
-    tone: "border-rose-200 bg-rose-50",
+    tone: "border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/40",
   },
   {
     id: "deleted",
@@ -85,7 +85,7 @@ const noticeGroups: NoticeGroup[] = [
       "Older product cards removed from homepage sections",
       "Discontinued SKUs disabled from customer search",
     ],
-    tone: "border-slate-300 bg-slate-100",
+    tone: "border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-900",
   },
   {
     id: "company-news",
@@ -97,7 +97,7 @@ const noticeGroups: NoticeGroup[] = [
       "Camera-first marketing campaigns improving click-through",
       "Competitive pricing updates driving value-focused traffic",
     ],
-    tone: "border-amber-200 bg-amber-50",
+    tone: "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40",
   },
 ];
 
@@ -126,17 +126,17 @@ const bannerProducts = [
 
 const NotificationPage = () => {
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 dark:text-slate-50">
       <NavBar />
       <section className="mx-auto max-w-2xl px-4 py-10 md:px-8 lg:py-12">
-        <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <p className="text-xs font-semibold uppercase tracking-widest text-violet-700">
             Notification Center
           </p>
-          <h1 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">
+          <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50 md:text-3xl">
             Gadget Activity Overview
           </h1>
-          <p className="mt-2 max-w-3xl text-sm text-slate-600">
+          <p className="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-300">
             A consolidated feed for discount activity, demand movement, stock
             changes, catalog updates, and market-level brand news.
           </p>
@@ -145,9 +145,9 @@ const NotificationPage = () => {
             {bannerProducts.map((product) => (
               <article
                 key={product.id}
-                className="group relative h-40 overflow-hidden rounded-xl border border-slate-200 bg-linear-to-b from-slate-50 to-white"
+                className="group relative h-40 overflow-hidden rounded-xl border border-slate-200 bg-linear-to-b from-slate-50 to-white dark:border-slate-700 dark:from-slate-900 dark:to-slate-950"
               >
-                <div className="absolute inset-x-4 top-3 h-px bg-slate-200" />
+                <div className="absolute inset-x-4 top-3 h-px bg-slate-200 dark:bg-slate-700" />
                 <Image
                   src={product.image}
                   alt={product.name}
@@ -171,7 +171,7 @@ const NotificationPage = () => {
               className={`rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${group.tone}`}
             >
               <div className="flex items-start justify-between gap-3">
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
                   {group.title}
                 </h2>
                 <span className="rounded-full bg-slate-900 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
@@ -179,14 +179,14 @@ const NotificationPage = () => {
                 </span>
               </div>
 
-              <p className="mt-2 text-sm leading-6 text-slate-700">
+              <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
                 {group.description}
               </p>
 
-              <ul className="mt-4 space-y-2 text-sm text-slate-800">
+              <ul className="mt-4 space-y-2 text-sm text-slate-800 dark:text-slate-100">
                 {group.items.map((item) => (
                   <li key={item} className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-slate-500" />
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-slate-500 dark:bg-slate-300" />
                     <span>{item}</span>
                   </li>
                 ))}

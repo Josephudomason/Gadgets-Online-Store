@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavBar } from "./nav";
 import Footer from "./footer";
 import Categories from "@/components/categories";
@@ -12,10 +12,20 @@ import AppleSection from "@/components/apple";
 import SamsungSection from "@/components/samsung";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useTheme } from "@/components/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
+  const { theme } = useTheme();
+  const [countdown, setCountdown] = useState({
+    minutes: "15",
+    seconds: "00",
+    milliseconds: "000",
+  });
   const [expandedSections, setExpandedSections] = useState({
+    categories: false,
+    brands: false,
     topSales: false,
     recommended: false,
     discount: false,
@@ -30,8 +40,37 @@ export default function Home() {
     }));
   };
 
+  useEffect(() => {
+    const durationMs = 15 * 60 * 1000;
+    let targetTime = Date.now() + durationMs;
+
+    const updateCountdown = () => {
+      const remaining = Math.max(targetTime - Date.now(), 0);
+
+      if (remaining === 0) {
+        targetTime = Date.now() + durationMs;
+      }
+
+      const safeRemaining = Math.max(targetTime - Date.now(), 0);
+      const minutes = Math.floor(safeRemaining / 60000);
+      const seconds = Math.floor((safeRemaining % 60000) / 1000);
+      const milliseconds = safeRemaining % 1000;
+
+      setCountdown({
+        minutes: String(minutes).padStart(2, "0"),
+        seconds: String(seconds).padStart(2, "0"),
+        milliseconds: String(milliseconds).padStart(3, "0"),
+      });
+    };
+
+    updateCountdown();
+    const interval = window.setInterval(updateCountdown, 50);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   return (
-    <div className="bg-gray-100">
+    <div id="top" className={theme === "dark" ? "bg-black" : "bg-gray-100"}>
       <NavBar />
 
       {/*Banner*/}
@@ -46,28 +85,54 @@ export default function Home() {
         />
       </div>
 
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8">
+      <main
+        className={`mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8 ${theme === "dark" ? "bg-black" : "bg-gray-100"
+          }`}
+      >
         {/*Categories and brands*/}
 
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex w-full flex-col rounded-lg bg-white p-4 shadow-sm">
-            <div className="flex justify-between gap-5">
+        <div className="-mt-15 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex w-full flex-col rounded-lg bg-white p-4 shadow-sm dark:bg-slate-900">
+            <div className="mb-3 flex justify-between gap-5">
               <p className="font-bold">shop by category</p>
-              <p className="text-[#6B52F1] hover:underline">see more</p>
+              <button
+                type="button"
+                onClick={() => toggleSection("categories")}
+                className="text-[#6B52F1] hover:underline"
+              >
+                {expandedSections.categories ? "show less" : "see more"}
+              </button>
             </div>
-            <div className="flex justify-between">
-              <Categories />
-            </div>
+            <Categories
+              expanded={expandedSections.categories}
+              onExpandedChange={(expanded) =>
+                setExpandedSections((prev) => ({
+                  ...prev,
+                  categories: expanded,
+                }))
+              }
+              showToggleButton={false}
+            />
           </div>
 
-          <div className="flex w-full flex-col rounded-lg bg-white p-4 shadow-sm">
-            <div className="flex justify-between gap-5">
+          <div className="flex w-full flex-col rounded-lg bg-white p-4 shadow-sm dark:bg-slate-900">
+            <div className="mb-3 flex justify-between gap-5">
               <p className="font-bold">shop by brand</p>
-              <p className="text-[#6B52F1] hover:underline">see more</p>
+              <button
+                type="button"
+                onClick={() => toggleSection("brands")}
+                className="text-[#6B52F1] hover:underline"
+              >
+                {expandedSections.brands ? "show less" : "see more"}
+              </button>
             </div>
-            <div className="flex justify-between">
-              <Brands />
-            </div>
+            <Brands
+              expanded={expandedSections.brands}
+              onExpandedChange={(expanded) =>
+                setExpandedSections((prev) => ({ ...prev, brands: expanded }))
+              }
+              showToggleButton={false}
+            />
           </div>
         </div>
 
@@ -109,7 +174,9 @@ export default function Home() {
               </span>
             </div>
             <div>
-              <Button className="rounded bg-[#6B52F1]">Shop Now</Button>
+              <Button asChild className="rounded bg-[#6B52F1]">
+                <Link href="/#recommended">Shop Now</Link>
+              </Button>
             </div>
           </div>
         </section>
@@ -118,10 +185,10 @@ export default function Home() {
 
         <section
           id="top-sales"
-          className="rounded-lg bg-white p-5 shadow-sm sm:p-6"
+          className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900 sm:p-6"
         >
           <div className="mb-6 flex items-center justify-between gap-4">
-            <h1 className="text-lg font-semibold text-gray-900">
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
               Top selling items
             </h1>
             <button
@@ -146,10 +213,13 @@ export default function Home() {
 
         {/*  recommended for you */}
 
-        <section className="rounded-lg bg-white p-5 shadow-sm sm:p-6">
+        <section
+          id="recommended"
+          className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900 sm:p-6"
+        >
           <div className="mb-6 flex items-center justify-between gap-4">
-            <h1 className="text-lg font-semibold text-gray-900">
-              recommended for you
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+              Recommended for you
             </h1>
             <button
               type="button"
@@ -176,11 +246,31 @@ export default function Home() {
 
         {/* 15% Sales Discount */}
 
-        <section className="rounded-lg bg-white p-5 shadow-sm sm:p-6">
+        <section className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900 sm:p-6">
           <div className="mb-6 flex items-center justify-between gap-4">
-            <h1 className="text-lg font-semibold text-gray-900">
-              discount sales
-            </h1>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                15% Sales Discount
+              </h1>
+              <span className="text-sm text-gray-600 dark:text-slate-300">
+                Ends in:
+              </span>
+              <span className="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white">
+                {countdown.minutes}
+              </span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                :
+              </span>
+              <span className="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white">
+                {countdown.seconds}
+              </span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                :
+              </span>
+              <span className="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white">
+                {countdown.milliseconds}
+              </span>
+            </div>
             <button
               type="button"
               onClick={() => toggleSection("discount")}
@@ -203,9 +293,11 @@ export default function Home() {
 
         {/* Apple Iphones */}
 
-        <section className="rounded-lg bg-white p-5 shadow-sm sm:p-6">
+        <section className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900 sm:p-6">
           <div className="mb-6 flex items-center justify-between gap-4">
-            <h1 className="text-lg font-semibold text-gray-900">Apple</h1>
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+              Apple Iphones
+            </h1>
             <button
               type="button"
               onClick={() => toggleSection("apple")}
@@ -227,9 +319,11 @@ export default function Home() {
         </section>
 
         {/* Samsung Phones */}
-        <section className="rounded-lg bg-white p-5 shadow-sm sm:p-6">
+        <section className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900 sm:p-6">
           <div className="mb-6 flex items-center justify-between gap-4">
-            <h1 className="text-lg font-semibold text-gray-900">Samsung</h1>
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+              Samsung Phones
+            </h1>
             <button
               type="button"
               onClick={() => toggleSection("samsung")}
@@ -239,7 +333,7 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="w-full bg-white">
+          <div className="w-full bg-white dark:bg-slate-900">
             <SamsungSection
               expanded={expandedSections.samsung}
               onExpandedChange={(expanded) =>
