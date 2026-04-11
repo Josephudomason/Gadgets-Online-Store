@@ -41,7 +41,7 @@ const Categories = ({
             className="min-h-10 rounded-xl bg-white p-3 text-center text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white"
           >
             <div className="flex flex-col items-center justify-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-md border border-slate-200 bg-slate-50 dark:border-white/15 dark:bg-white/10">
+              <div className="flex h-14 w-14 items-center justify-center rounded-md border border-slate-200 bg-slate-50 dark:border-slate-200 dark:bg-white">
                 {product.href ? (
                   <Link
                     href={product.href}

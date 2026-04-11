@@ -7,48 +7,33 @@ import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
-  CART_STORAGE_KEY,
   DELIVERY_FEE,
   DISCOUNT_RATE,
   formatPrice,
   parsePrice,
+  readCartItems,
+  subscribeToCart,
+  writeCartItems,
 } from "@/lib/cart";
 import type { CartItem } from "@/lib/cart";
 
-const emptySubscribe = () => () => {};
-
-const readCartItems = () => {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
-
-  return storedCart ? (JSON.parse(storedCart) as CartItem[]) : [];
-};
-
 const Cart = () => {
-  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  const [cartVersion, setCartVersion] = useState(0);
+  const isClient = useSyncExternalStore(subscribeToCart, () => true, () => false);
+  const cartItems = useSyncExternalStore(subscribeToCart, readCartItems, () => []);
   const [deselectedItemIds, setDeselectedItemIds] = useState<string[]>([]);
 
-  const cartItems = useMemo(() => {
-    void cartVersion;
-
-    return isClient ? readCartItems() : [];
-  }, [cartVersion, isClient]);
-
   const persistCartItems = (nextCartItems: CartItem[]) => {
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCartItems));
-    setDeselectedItemIds((currentIds) =>
-      currentIds.filter((itemId) => nextCartItems.some((item) => item.id === itemId))
-    );
-    setCartVersion((currentVersion) => currentVersion + 1);
+    writeCartItems(nextCartItems);
   };
 
-  const selectedItems = useMemo(
-    () => cartItems.filter((item) => !deselectedItemIds.includes(item.id)),
+  const activeDeselectedItemIds = useMemo(
+    () => deselectedItemIds.filter((itemId) => cartItems.some((item) => item.id === itemId)),
     [cartItems, deselectedItemIds]
+  );
+
+  const selectedItems = useMemo(
+    () => cartItems.filter((item) => !activeDeselectedItemIds.includes(item.id)),
+    [activeDeselectedItemIds, cartItems]
   );
 
   const subtotal = selectedItems.reduce(
@@ -87,7 +72,7 @@ const Cart = () => {
 
   if (!isClient) {
     return (
-      <div className="rounded-3xl bg-white p-8 text-center shadow-sm dark:bg-slate-900">
+      <div className="rounded-3xl bg-white p-8 text-center shadow-sm dark:bg-slate-800">
         <p className="text-base text-gray-500 dark:text-slate-400">Loading cart...</p>
       </div>
     );
@@ -95,7 +80,7 @@ const Cart = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="rounded-3xl bg-white p-8 text-center shadow-sm dark:bg-slate-900">
+      <div className="rounded-3xl bg-white p-8 text-center shadow-sm dark:bg-slate-800">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-50">Your cart is empty</h2>
         <p className="mt-3 text-gray-500 dark:text-slate-400">
           Add products from the info page and they will show up here.
@@ -113,13 +98,13 @@ const Cart = () => {
         {cartItems.map((item) => (
           <article
             key={item.id}
-            className="rounded-3xl bg-white p-5 shadow-sm transition hover:shadow-md dark:bg-slate-900"
+            className="rounded-3xl bg-white p-5 shadow-sm transition hover:shadow-md dark:bg-slate-800"
           >
             <div className="flex flex-col gap-5 md:flex-row md:items-center">
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
-                  checked={!deselectedItemIds.includes(item.id)}
+                  checked={!activeDeselectedItemIds.includes(item.id)}
                   onChange={() => toggleSelection(item.id)}
                   className="h-4 w-4 accent-[#6B52F1]"
                 />
@@ -127,7 +112,7 @@ const Cart = () => {
               </label>
 
               <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="flex h-28 w-full max-w-32 items-center justify-center rounded-2xl bg-gray-50 p-4 dark:bg-slate-950">
+                <div className="flex h-28 w-full max-w-32 items-center justify-center rounded-2xl bg-gray-50 p-4 dark:bg-gray-100">
                   <Image
                     src={item.image}
                     alt={item.name}
@@ -152,7 +137,7 @@ const Cart = () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-3 md:flex-col md:items-end">
-                <div className="flex items-center rounded-full border border-gray-200 bg-gray-50 p-1 dark:border-slate-700 dark:bg-slate-950">
+                <div className="flex items-center rounded-full border border-gray-200 bg-gray-50 p-1 dark:border-slate-700 dark:bg-slate-900">
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.id, -1)}
@@ -188,7 +173,7 @@ const Cart = () => {
         ))}
       </div>
 
-      <aside className="h-fit rounded-3xl bg-white p-6 shadow-sm dark:bg-slate-900">
+      <aside className="h-fit rounded-3xl bg-white p-6 shadow-sm dark:bg-slate-800">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-600">
           Order summary
         </p>
@@ -233,7 +218,7 @@ const Cart = () => {
         <Button
           asChild
           variant="outline"
-          className="mt-3 h-11 w-full dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800"
+          className="mt-3 h-11 w-full dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-700"
         >
           <Link href="/">Continue shopping</Link>
         </Button>

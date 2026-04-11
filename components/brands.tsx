@@ -42,8 +42,8 @@ const Brands = ({
           >
             <div className="flex flex-col items-center justify-center">
               <div
-                className={`flex h-14 w-14 items-center justify-center rounded-md border border-slate-200 bg-slate-50 p-2 dark:border-white/15 dark:bg-white/10 ${
-                  brand.brandName === "Infinix" ? "dark:bg-slate-950" : ""
+                className={`flex h-14 w-14 items-center justify-center rounded-md border border-slate-200 bg-slate-50 p-2 dark:border-slate-200 dark:bg-white ${
+                  brand.brandName === "Infinix" ? "dark:bg-white" : ""
                 }`}
               >
                 {brand.href ? (

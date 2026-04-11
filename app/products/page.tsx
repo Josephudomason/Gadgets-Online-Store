@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavBar } from "../nav";
 import Footer from "../footer";
 
@@ -19,9 +19,24 @@ export default function Home() {
     categories: false,
     brands: false,
   });
+  const [discountSeconds, setDiscountSeconds] = useState((30 * 60) + 1);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setDiscountSeconds((current) => (current > 0 ? current - 1 : 0));
+    }, 1000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  const discountHours = Math.floor(discountSeconds / 3600);
+  const discountMinutes = Math.floor((discountSeconds % 3600) / 60);
+  const discountDisplaySeconds = discountSeconds % 60;
 
   return (
-    <div className="bg-gray-100 dark:bg-slate-950 dark:text-slate-50">
+    <div className="bg-gray-100 dark:bg-slate-900 dark:text-slate-50">
       <NavBar />
 
       <div className="w-full">
@@ -41,7 +56,7 @@ export default function Home() {
 
       {/*Categories and brands */}
 
-      <section className="w-full bg-gray-100 px-4 dark:bg-slate-950 md:px-10">
+      <section className="w-full bg-gray-100 px-4 dark:bg-slate-900 md:px-10">
         <div className="-mt-5 flex flex-col gap-6 lg:flex-row lg:justify-between">
           <div className="flex w-full flex-col rounded-md bg-white shadow-md dark:bg-slate-900 lg:max-w-lg">
             <div className="flex justify-between w-full px-4 py-2  ">
@@ -179,26 +194,22 @@ export default function Home() {
 
       {/*Gadgets 3*/}
       <section className="bg-white dark:bg-slate-900">
-        <div className="flex justify-between mt-25">
-          <div className="flex">
+        <div className="mt-25 flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-2">
             <h1 className="gap-x-2 font-bold text-gray-900 dark:text-white">15% Sales Discount</h1>
 
-            <div className="flex">
-              <span className="font-bold text-gray-900 dark:text-white">Ends in</span>
-              <div className="bg-red-500">
-
-                <span>
-                  02
-                </span>
-                <span>
-                  34</span>
-                <span>
-                  50
-                </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-gray-900 dark:text-white">Ends in:</span>
+              <div className="mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-red-500 px-3 py-1 text-xs font-semibold text-white sm:text-sm">
+                <span>{discountHours}</span>
+                <span>:</span>
+                <span>{String(discountMinutes).padStart(2, "0")}</span>
+                <span>:</span>
+                <span>{String(discountDisplaySeconds).padStart(2, "0")}</span>
               </div>
             </div>
           </div>
-          <h1 className="text-violet-600">see more</h1>
+          <h1 className="shrink-0 whitespace-nowrap text-violet-600">see more</h1>
         </div>
 
         <div className="w-full ">

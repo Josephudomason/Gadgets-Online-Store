@@ -12,10 +12,10 @@ import { Separator } from "@/components/ui/separator";
 
 const Footer = () => {
   return (
-    <footer className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <div className="mb-15 mt-10 p-10">
-        <div className="mb-5 flex cursor-pointer justify-between px-10">
-          <Link href="/#top" aria-label="Back to top">
+    <footer className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+      <div className="mx-auto mt-10 max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-5 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+          <Link href="/#top" aria-label="Back to top" className="lg:justify-self-start">
             <Image
               src="/page/logo.png"
               alt="logo"
@@ -27,7 +27,7 @@ const Footer = () => {
             />
           </Link>
 
-          <ul className="flex justify-between gap-20 font-bold lg:mr-120 sm:mr-50 md:mr-70">
+          <ul className="flex flex-col gap-4 font-bold sm:flex-row sm:items-center sm:justify-between sm:gap-10 lg:justify-self-center">
             <li>
               <Link href="/#top-sales">Shop</Link>
             </li>
@@ -38,13 +38,15 @@ const Footer = () => {
               <Link href="/contact-us">Contact Us</Link>
             </li>
           </ul>
+
+          <div className="hidden lg:block" />
         </div>
 
         <div>
           <Separator className="bg-[#6B52F1]" />
         </div>
 
-        <div className="mt-10 flex justify-between px-20 text-sm font-extralight">
+        <div className="mt-10 grid gap-8 text-sm font-extralight sm:grid-cols-2 lg:grid-cols-3">
           <ul className="flex cursor-pointer flex-col gap-2">
             <li className="font-bold text-sm">
               <Link href="/">Home</Link>

@@ -7,7 +7,6 @@ import { NavBar } from "@/app/nav";
 import AddToCartButton from "@/components/add-to-cart-button";
 import ProductFeedback from "@/components/product-feedback";
 import RelatedProducts from "@/components/related-products";
-import { Button } from "@/components/ui/button";
 import { getProductById, getRelatedProducts, products } from "@/lib/productCatalog";
 
 type ProductPageProps = {
@@ -30,11 +29,11 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
   const relatedProducts = getRelatedProducts(product);
 
   return (
-    <main className="min-h-screen bg-gray-100 dark:bg-slate-950 dark:text-slate-50">
+    <main className="min-h-screen bg-gray-100 dark:bg-slate-900 dark:text-slate-50">
       <NavBar />
 
       <section className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-[1.05fr_1fr] md:px-8">
-        <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900">
+        <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800">
           <div className="mb-6 flex items-center justify-between">
             <Link
               href="/products"
@@ -49,7 +48,7 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
             ) : null}
           </div>
 
-          <div className="flex min-h-80 items-center justify-center rounded-2xl bg-gray-50 p-6 dark:bg-slate-950">
+          <div className="flex min-h-80 items-center justify-center rounded-2xl bg-gray-50 p-6 dark:bg-gray-100">
             <Image
               src={product.image}
               alt={product.name}
@@ -62,7 +61,7 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-900">
+        <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-slate-800">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-600">
             Product details
           </p>
@@ -83,15 +82,7 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
             <p className="mt-6 text-2xl font-bold text-gray-900 dark:text-slate-50">{product.price}</p>
           ) : null}
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <AddToCartButton product={product} />
-            <Button
-              asChild
-              className="bg-violet-600 px-5 text-white hover:bg-violet-700"
-            >
-              <Link href="/checkout">Proceed to checkout</Link>
-            </Button>
-          </div>
+          <AddToCartButton product={product} />
 
           <p className="mt-6 text-base leading-7 text-gray-600 dark:text-slate-300">{product.description}</p>
 
@@ -101,7 +92,7 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
               {Object.entries(product.Specifications).map(([label, value]) => (
                 <div
                   key={label}
-                  className="flex flex-col gap-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <span className="text-sm font-medium capitalize text-gray-500 dark:text-slate-400">
                     {label.replace(/([A-Z])/g, " $1")}
@@ -118,7 +109,7 @@ const ProductInfoPage = async ({ params }: ProductPageProps) => {
 
       {relatedProducts.length > 0 ? (
         <section className="mx-auto max-w-6xl px-4 pb-10 md:px-8">
-          <div className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900 sm:p-6">
+          <div className="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-800 sm:p-6">
             <div className="mb-6 flex items-center justify-between gap-4">
               <h2 className="text-lg font-bold text-gray-900 dark:text-slate-50">
                 Related products

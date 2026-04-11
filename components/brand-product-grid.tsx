@@ -39,14 +39,22 @@ const BrandProductGrid = ({
     <div className="space-y-6">
       <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {visible.map((product) => (
-          <Link
+          <article
             key={product.id}
-            href={getProductHref(product)}
-            className="relative block rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-950"
+            className="relative rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-700 dark:bg-slate-800"
           >
-            <article>
-              <CartCornerIcon />
-              <div className="flex h-56 items-center justify-center rounded-2xl bg-slate-50 p-4 dark:bg-slate-900">
+            <CartCornerIcon
+              product={{
+                id: product.id,
+                name: product.name,
+                image: product.image,
+                price: product.price,
+                brand: null,
+                model: product.line,
+              }}
+            />
+            <Link href={getProductHref(product)} className="block">
+              <div className="flex h-56 items-center justify-center rounded-2xl bg-slate-50 p-4 dark:bg-gray-100">
                 <Image
                   src={product.image}
                   alt={product.name}
@@ -74,8 +82,8 @@ const BrandProductGrid = ({
                   {product.price}
                 </p>
               </div>
-            </article>
-          </Link>
+            </Link>
+          </article>
         ))}
       </section>
       {canToggle ? (

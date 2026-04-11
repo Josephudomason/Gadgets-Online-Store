@@ -4,7 +4,7 @@ import Cart from "@/components/cart";
 
 const CartPage = () => {
   return (
-    <main className="min-h-screen bg-gray-100 dark:bg-slate-950 dark:text-slate-50">
+    <main className="min-h-screen bg-gray-100 dark:bg-slate-900 dark:text-slate-50">
       <NavBar />
 
       <section className="mx-auto max-w-7xl px-4 py-10 md:px-8">

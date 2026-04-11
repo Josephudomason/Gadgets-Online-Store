@@ -29,7 +29,7 @@ const BrandCatalogPage = ({
   products,
 }: BrandCatalogPageProps) => {
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
+    <main className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-900 dark:text-slate-50">
       <NavBar />
 
       <section className="mx-auto max-w-7xl px-4 py-10 md:px-8">

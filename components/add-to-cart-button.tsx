@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 
+import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
-import { CART_STORAGE_KEY, createCartItem } from "@/lib/cart";
-import type { CartItem } from "@/lib/cart";
+import { addProductToCart } from "@/lib/cart";
 import type { ProductCatalogItem } from "@/lib/productCatalog";
 
 type AddToCartButtonProps = {
@@ -13,42 +14,44 @@ type AddToCartButtonProps = {
 
 const AddToCartButton = ({ product }: AddToCartButtonProps) => {
   const [isAdded, setIsAdded] = useState(false);
+  const { session } = useAuth();
+  const checkoutHref = useMemo(
+    () => (session ? "/checkout" : `/signup?next=${encodeURIComponent("/checkout")}`),
+    [session]
+  );
 
   const handleAddToCart = () => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const existingCart = window.localStorage.getItem(CART_STORAGE_KEY);
-    const cartItems: CartItem[] = existingCart ? JSON.parse(existingCart) : [];
-    const existingItem = cartItems.find((item) => item.id === product.id);
-
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      cartItems.push(createCartItem(product));
-    }
-
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+    addProductToCart(product);
     setIsAdded(true);
-
-    window.setTimeout(() => {
-      setIsAdded(false);
-    }, 1800);
   };
 
   return (
-    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="mt-8 flex w-full flex-col gap-3">
       <Button
         type="button"
         size="lg"
         onClick={handleAddToCart}
-        className="h-11 bg-[#6B52F1] px-6 text-white hover:bg-[#5b43dd]"
+        className="h-11 w-full bg-[#6B52F1] px-6 text-white hover:bg-[#5b43dd] sm:w-auto"
       >
         {isAdded ? "Added to cart" : "Add to cart"}
       </Button>
 
-      <p className="text-sm text-gray-500">
+      {isAdded ? (
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            asChild
+            variant="outline"
+            className="h-11 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+          >
+            <Link href="/cart">View cart</Link>
+          </Button>
+          <Button asChild className="h-11 bg-[#6B52F1] text-white hover:bg-[#5b43dd]">
+            <Link href={checkoutHref}>Proceed to checkout</Link>
+          </Button>
+        </div>
+      ) : null}
+
+      <p className="text-sm text-gray-500 dark:text-slate-400">
         {isAdded ? "This product has been saved in your cart." : "Add this product to your cart for checkout."}
       </p>
     </div>

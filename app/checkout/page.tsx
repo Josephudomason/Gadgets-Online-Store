@@ -16,7 +16,7 @@ import {
   getNavigationTrailSnapshot,
   subscribeToNavigationTrail,
 } from "@/lib/navigationTrail";
-import { CART_STORAGE_KEY } from "@/lib/cart";
+import { clearCartItems } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 
 const cardTypeOptions = [
@@ -82,8 +82,7 @@ const PaymentPageContent = () => {
     }
 
     const timeout = window.setTimeout(() => {
-      window.localStorage.removeItem(CART_STORAGE_KEY);
-      window.dispatchEvent(new Event("storage"));
+      clearCartItems();
       setPaymentState("success");
     }, 1800);
 
@@ -530,7 +529,7 @@ const PaymentPageContent = () => {
 
 const PaymentPage = () => {
   return (
-    <main className="min-h-screen w-full overflow-x-hidden bg-gray-100 dark:bg-slate-950">
+    <main className="min-h-screen w-full overflow-x-hidden bg-gray-100 dark:bg-slate-900">
       <NavBar />
       <AuthGate mode="protected">
         <PaymentPageContent />

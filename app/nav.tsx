@@ -3,12 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Menu,
   Moon,
   Search,
@@ -20,7 +18,7 @@ import {
 
 import { useAuth } from "@/components/providers/auth-provider";
 import { useTheme } from "@/components/providers/theme-provider";
-import { CART_STORAGE_KEY, type CartItem } from "@/lib/cart";
+import { readCartItems, subscribeToCart } from "@/lib/cart";
 import { products, getProductHref } from "@/lib/productCatalog";
 
 type SearchSuggestion = {
@@ -62,10 +60,13 @@ const SearchBar = ({
   compact?: boolean;
   onNavigate?: () => void;
 }) => {
+  const pathname = usePathname();
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const selectedCategory =
+    categoryOptions.find((option) => option.href === pathname)?.href ?? "";
 
   const suggestions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -113,7 +114,7 @@ const SearchBar = ({
     <div ref={containerRef} className={`relative ${className ?? ""}`}>
       <div className="flex w-full items-center overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-sm dark:border-slate-700 dark:bg-slate-900/95">
         <select
-          defaultValue=""
+          value={selectedCategory}
           aria-label="Browse categories"
           onChange={(event) => {
             const href = event.target.value;
@@ -123,7 +124,6 @@ const SearchBar = ({
             }
 
             router.push(href);
-            event.target.value = "";
             onNavigate?.();
           }}
           className={`shrink-0 border-r border-slate-200 bg-slate-100 px-3 text-left font-medium text-slate-700 outline-none transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 ${compact ? "h-12 text-xs" : "h-14 text-sm"
@@ -152,7 +152,7 @@ const SearchBar = ({
                 submitSearch();
               }
             }}
-            className={`w-full bg-transparent pr-2 text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-50 dark:placeholder:text-slate-500 ${compact ? "h-12 text-sm" : "h-14 text-sm"
+            className={`w-full bg-transparent pr-2 text-center text-slate-900 outline-none placeholder:text-center placeholder:text-slate-400 focus:text-left dark:text-slate-50 dark:placeholder:text-slate-500 ${compact ? "h-12 text-sm" : "h-14 text-sm"
               }`}
             placeholder="Search products in the store"
           />
@@ -215,7 +215,6 @@ const SearchBar = ({
 export const NavBar = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [canGoBack, setCanGoBack] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -232,37 +231,19 @@ export const NavBar = () => {
       return;
     }
 
-    const syncHistoryState = () => {
-      setCanGoBack(window.history.length > 1);
-    };
-
-    syncHistoryState();
-    window.addEventListener("popstate", syncHistoryState);
-
-    return () => {
-      window.removeEventListener("popstate", syncHistoryState);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
     const syncCartCount = () => {
-      const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
-      const cartItems = storedCart ? (JSON.parse(storedCart) as CartItem[]) : [];
+      const cartItems = readCartItems();
       const nextCount = cartItems.reduce((total, item) => total + item.quantity, 0);
       setCartCount(nextCount);
     };
 
     syncCartCount();
-    window.addEventListener("storage", syncCartCount);
     window.addEventListener("focus", syncCartCount);
+    const unsubscribe = subscribeToCart(syncCartCount);
 
     return () => {
-      window.removeEventListener("storage", syncCartCount);
       window.removeEventListener("focus", syncCartCount);
+      unsubscribe();
     };
   }, []);
 
@@ -306,12 +287,12 @@ export const NavBar = () => {
     };
   }, [isLogoutModalOpen, logoutDeadline, logout, router]);
 
-  const accountLabel = session && user?.name ? user.name.split(" ")[0] : "Account";
+  const accountLabel = session && user?.name ? user.name.split(" ")[0] : "";
   const accountDestination = session ? "/profile" : "/signup";
 
   return (
     <>
-      <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#5a45db] text-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
+      <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#5a45db] text-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="mx-auto flex max-w-7xl flex-col px-4 py-3 sm:px-6 lg:px-8">
           <div className="hidden items-center gap-3 lg:flex">
             <Link
@@ -334,31 +315,10 @@ export const NavBar = () => {
             <SearchBar className="flex-1 px-4" onNavigate={closeMobileMenu} />
 
             <div className="ml-auto flex items-center gap-2 sm:gap-3">
-              <div className="hidden items-center gap-2 xl:flex">
-                <button
-                  type="button"
-                  onClick={() => router.back()}
-                  disabled={!canGoBack}
-                  aria-label="Go back"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => router.forward()}
-                  aria-label="Go forward"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-
               <Link
                 href="/cart"
                 aria-label="Cart"
-                className="relative hidden h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20 sm:inline-flex"
+                className="relative hidden h-10 w-10 items-center justify-center text-white/85 transition hover:text-white sm:inline-flex"
               >
                 <ShoppingBag size={18} />
                 {cartCount > 0 ? (
@@ -371,7 +331,7 @@ export const NavBar = () => {
               <Link
                 href="/notification"
                 aria-label="Notifications"
-                className="hidden h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20 sm:inline-flex"
+                className="hidden h-10 w-10 items-center justify-center text-white/85 transition hover:text-white sm:inline-flex"
               >
                 <Bell size={18} />
               </Link>
@@ -381,21 +341,21 @@ export const NavBar = () => {
                 onClick={toggleTheme}
                 aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
                 title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20"
+                className="inline-flex h-10 w-10 items-center justify-center text-white/85 transition hover:text-white"
               >
                 {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
               </button>
 
               <div ref={accountMenuRef} className="relative hidden md:block">
-                <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 p-1 shadow-sm">
+                <div className="flex items-center gap-2">
                   <Link
                     href={accountDestination}
-                    className="inline-flex items-center gap-3 rounded-full px-2 py-1.5 text-sm font-medium transition hover:bg-white/10"
+                    className="inline-flex h-10 items-center gap-2 text-sm font-medium text-white/85 transition hover:text-white"
                   >
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#5a45db]">
-                      <User size={16} />
+                    <span className="inline-flex h-10 w-10 items-center justify-center">
+                      <User size={18} />
                     </span>
-                    <span>{accountLabel}</span>
+                    {accountLabel ? <span>{accountLabel}</span> : null}
                   </Link>
 
                   <button
@@ -403,11 +363,9 @@ export const NavBar = () => {
                     aria-label="Open account menu"
                     aria-expanded={isAccountMenuOpen}
                     onClick={() => setIsAccountMenuOpen((current) => !current)}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 transition hover:bg-white/20"
+                    className="inline-flex h-10 w-10 items-center justify-center text-white/85 transition hover:text-white"
                   >
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#5a45db]">
-                      <ChevronDown size={16} />
-                    </span>
+                    <ChevronDown size={18} />
                   </button>
                 </div>
 
@@ -503,33 +461,6 @@ export const NavBar = () => {
 
           {isMobileMenuOpen ? (
             <div className="mt-4 rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur lg:hidden">
-              <div className="mb-3 grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    router.back();
-                    closeMobileMenu();
-                  }}
-                  disabled={!canGoBack}
-                  className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-3 py-3 text-sm font-medium transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <ChevronLeft size={18} />
-                  <span>Back</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    router.forward();
-                    closeMobileMenu();
-                  }}
-                  className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-3 py-3 text-sm font-medium transition hover:bg-white/15"
-                >
-                  <ChevronRight size={18} />
-                  <span>Forward</span>
-                </button>
-              </div>
-
               <div className="grid grid-cols-2 gap-3">
                 <Link
                   href="/cart"
@@ -551,7 +482,7 @@ export const NavBar = () => {
                   className="flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-3 py-4 text-sm font-medium transition hover:bg-white/15"
                 >
                   <User size={18} />
-                  <span className="mt-2">Profile</span>
+                  <span className="mt-2">{accountLabel || "Account"}</span>
                 </Link>
 
                 <Link
