@@ -43,7 +43,7 @@ const SignupPage = () => {
       <AuthGate mode="signup">
         <AuthShell
           heading="Create your store account"
-          description="Create your account once and we will save your profile details locally so checkout and account access keep working across the app."
+          description="Create your account once and we will save your profile details securely so checkout and account access keep working across the app."
           activeHref="/signup"
         >
           <div>
@@ -55,9 +55,9 @@ const SignupPage = () => {
 
           <form
             className="mt-8 space-y-5"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
-              const result = signup(form);
+              const result = await signup(form);
               setMessage(result.message);
 
               if (result.ok) {

@@ -67,7 +67,7 @@ export const AuthShell = ({
               <li>New users are sent to sign up first.</li>
               <li>Sign-up creates a saved profile and active session.</li>
               <li>Returning users can log in with the same credentials.</li>
-              <li>Authenticated users land on their account page.</li>
+              <li>Authenticated users can continue to checkout or their account.</li>
             </ul>
           </div>
         </div>

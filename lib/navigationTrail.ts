@@ -8,8 +8,9 @@ type NavigationTrailItem = {
   label: string;
 };
 
+const EMPTY_NAVIGATION_TRAIL: NavigationTrailItem[] = [];
 let cachedTrailRaw: string | null | undefined;
-let cachedTrailSnapshot: NavigationTrailItem[] = [];
+let cachedTrailSnapshot: NavigationTrailItem[] = EMPTY_NAVIGATION_TRAIL;
 
 const isBrowser = () => typeof window !== "undefined";
 
@@ -44,30 +45,32 @@ const getLabelForPath = (pathname: string) => {
 
 const parseTrail = (raw: string | null) => {
   if (!raw) {
-    return [];
+    return EMPTY_NAVIGATION_TRAIL;
   }
 
   try {
     const parsed = JSON.parse(raw) as NavigationTrailItem[];
 
     if (!Array.isArray(parsed)) {
-      return [];
+      return EMPTY_NAVIGATION_TRAIL;
     }
 
-    return parsed.filter(
+    const filteredTrail = parsed.filter(
       (item) =>
         item &&
         typeof item.href === "string" &&
         typeof item.label === "string"
     );
+
+    return filteredTrail.length > 0 ? filteredTrail : EMPTY_NAVIGATION_TRAIL;
   } catch {
-    return [];
+    return EMPTY_NAVIGATION_TRAIL;
   }
 };
 
 export const getNavigationTrailSnapshot = (): NavigationTrailItem[] => {
   if (!isBrowser()) {
-    return [];
+    return EMPTY_NAVIGATION_TRAIL;
   }
 
   const raw = window.sessionStorage.getItem(NAVIGATION_TRAIL_STORAGE_KEY);
@@ -116,4 +119,5 @@ export const subscribeToNavigationTrail = (onStoreChange: () => void) => {
   };
 };
 
+export { EMPTY_NAVIGATION_TRAIL };
 export type { NavigationTrailItem };

@@ -23,7 +23,7 @@ const Footer = () => {
               height={40}
               sizes="40px"
               style={{ height: "auto" }}
-              className="w-[40px]"
+              className="pristine-logo-glow w-[40px]"
             />
           </Link>
 

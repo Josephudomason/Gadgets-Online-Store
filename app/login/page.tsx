@@ -53,9 +53,9 @@ const LoginPage = () => {
 
           <form
             className="mt-8 space-y-5"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
-              const result = login(form);
+              const result = await login(form);
               setMessage(result.message);
 
               if (result.ok) {

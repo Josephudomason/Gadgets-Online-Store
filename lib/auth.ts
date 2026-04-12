@@ -1,7 +1,3 @@
-"use client";
-
-export const AUTH_USER_STORAGE_KEY = "store-auth-user";
-export const AUTH_SESSION_STORAGE_KEY = "store-auth-session";
 export const AUTH_STATE_EVENT = "store-auth-change";
 
 export type StoredUser = {
@@ -11,7 +7,6 @@ export type StoredUser = {
   gender: string;
   age: string;
   email: string;
-  password: string;
   createdAt: string;
 };
 
@@ -20,17 +15,49 @@ export type AuthSession = {
   loggedInAt: string;
 };
 
+type AuthSnapshot = {
+  isReady: boolean;
+  user: StoredUser | null;
+  session: AuthSession | null;
+};
+
+type SignupPayload = {
+  name: string;
+  homeAddress: string;
+  phoneNumber: string;
+  gender: string;
+  age: string;
+  email: string;
+  password: string;
+};
+
+type LoginPayload = {
+  email: string;
+  password: string;
+};
+
+type UpdateProfilePayload = Omit<SignupPayload, "email" | "password">;
+
+type AuthMutationResult = {
+  ok: boolean;
+  message: string;
+};
+
+const INITIAL_AUTH_SNAPSHOT: AuthSnapshot = {
+  isReady: false,
+  user: null,
+  session: null,
+};
+
+let authSnapshot = INITIAL_AUTH_SNAPSHOT;
+let authInitializationPromise: Promise<void> | null = null;
+const listeners = new Set<() => void>();
+
 export const normalizeEmail = (email: string) => email.trim().toLowerCase();
 const normalizeText = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
 
-const isBrowser = () => typeof window !== "undefined";
-let cachedUserRaw: string | null | undefined;
-let cachedUserSnapshot: StoredUser | null = null;
-let cachedSessionRaw: string | null | undefined;
-let cachedSessionSnapshot: AuthSession | null = null;
-
-const normalizeStoredUser = (value: unknown): StoredUser | null => {
+const sanitizeUser = (value: unknown): StoredUser | null => {
   if (!value || typeof value !== "object") {
     return null;
   }
@@ -49,7 +76,6 @@ const normalizeStoredUser = (value: unknown): StoredUser | null => {
     gender: normalizeText(candidate.gender),
     age: normalizeText(candidate.age),
     email,
-    password: typeof candidate.password === "string" ? candidate.password : "",
     createdAt:
       typeof candidate.createdAt === "string" && candidate.createdAt
         ? candidate.createdAt
@@ -57,123 +83,182 @@ const normalizeStoredUser = (value: unknown): StoredUser | null => {
   };
 };
 
-export const readStoredUser = (): StoredUser | null => {
-  if (!isBrowser()) {
+const sanitizeSession = (value: unknown): AuthSession | null => {
+  if (!value || typeof value !== "object") {
     return null;
   }
 
-  const raw = window.localStorage.getItem(AUTH_USER_STORAGE_KEY);
+  const candidate = value as Partial<AuthSession>;
 
-  if (raw === cachedUserRaw) {
-    return cachedUserSnapshot;
-  }
-
-  cachedUserRaw = raw;
-
-  if (!raw) {
-    cachedUserSnapshot = null;
-    return cachedUserSnapshot;
-  }
-
-  try {
-    cachedUserSnapshot = normalizeStoredUser(JSON.parse(raw));
-  } catch {
-    cachedUserSnapshot = null;
-  }
-
-  return cachedUserSnapshot;
-};
-
-export const writeStoredUser = (user: StoredUser | null) => {
-  if (!isBrowser()) {
-    return;
-  }
-
-  if (!user) {
-    window.localStorage.removeItem(AUTH_USER_STORAGE_KEY);
-    cachedUserRaw = null;
-    cachedUserSnapshot = null;
-    window.dispatchEvent(new Event(AUTH_STATE_EVENT));
-    return;
-  }
-
-  const raw = JSON.stringify(user);
-  window.localStorage.setItem(AUTH_USER_STORAGE_KEY, raw);
-  cachedUserRaw = raw;
-  cachedUserSnapshot = user;
-  window.dispatchEvent(new Event(AUTH_STATE_EVENT));
-};
-
-export const readAuthSession = (): AuthSession | null => {
-  if (!isBrowser()) {
+  if (
+    typeof candidate.email !== "string" ||
+    typeof candidate.loggedInAt !== "string"
+  ) {
     return null;
   }
 
-  const raw = window.localStorage.getItem(AUTH_SESSION_STORAGE_KEY);
-
-  if (raw === cachedSessionRaw) {
-    return cachedSessionSnapshot;
-  }
-
-  cachedSessionRaw = raw;
-
-  if (!raw) {
-    cachedSessionSnapshot = null;
-    return cachedSessionSnapshot;
-  }
-
-  try {
-    const session = JSON.parse(raw) as Partial<AuthSession>;
-
-    if (
-      typeof session.email !== "string" ||
-      typeof session.loggedInAt !== "string"
-    ) {
-      cachedSessionSnapshot = null;
-      return cachedSessionSnapshot;
-    }
-
-    cachedSessionSnapshot = {
-      email: normalizeEmail(session.email),
-      loggedInAt: session.loggedInAt,
-    };
-  } catch {
-    cachedSessionSnapshot = null;
-  }
-
-  return cachedSessionSnapshot;
-};
-
-export const writeAuthSession = (session: AuthSession | null) => {
-  if (!isBrowser()) {
-    return;
-  }
-
-  if (!session) {
-    window.localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-    cachedSessionRaw = null;
-    cachedSessionSnapshot = null;
-    window.dispatchEvent(new Event(AUTH_STATE_EVENT));
-    return;
-  }
-
-  const raw = JSON.stringify(session);
-  window.localStorage.setItem(AUTH_SESSION_STORAGE_KEY, raw);
-  cachedSessionRaw = raw;
-  cachedSessionSnapshot = session;
-  window.dispatchEvent(new Event(AUTH_STATE_EVENT));
-};
-
-export const subscribeToAuth = (onStoreChange: () => void) => {
-  if (!isBrowser()) {
-    return () => undefined;
-  }
-
-  window.addEventListener("storage", onStoreChange);
-  window.addEventListener(AUTH_STATE_EVENT, onStoreChange);
-
-  return () => {
-    window.removeEventListener("storage", onStoreChange);
-    window.removeEventListener(AUTH_STATE_EVENT, onStoreChange);
+  return {
+    email: normalizeEmail(candidate.email),
+    loggedInAt: candidate.loggedInAt,
   };
 };
+
+const emitAuthChange = () => {
+  listeners.forEach((listener) => listener());
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(AUTH_STATE_EVENT));
+  }
+};
+
+const setAuthSnapshot = (nextSnapshot: AuthSnapshot) => {
+  authSnapshot = nextSnapshot;
+  emitAuthChange();
+};
+
+const clearLegacyAuthStorage = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem("store-auth-user");
+  window.localStorage.removeItem("store-auth-session");
+};
+
+const readJsonSafely = async (response: Response) => {
+  try {
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+};
+
+const applySessionPayload = (payload: Record<string, unknown>) => {
+  setAuthSnapshot({
+    isReady: true,
+    user: sanitizeUser(payload.user),
+    session: sanitizeSession(payload.session),
+  });
+};
+
+export const getAuthSnapshot = () => authSnapshot;
+export const getAuthServerSnapshot = () => INITIAL_AUTH_SNAPSHOT;
+export const readStoredUser = () => authSnapshot.user;
+export const readAuthSession = () => authSnapshot.session;
+
+export const subscribeToAuth = (onStoreChange: () => void) => {
+  listeners.add(onStoreChange);
+
+  return () => {
+    listeners.delete(onStoreChange);
+  };
+};
+
+export const refreshAuthState = async () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/auth/session", {
+      credentials: "include",
+      cache: "no-store",
+    });
+    const payload = await readJsonSafely(response);
+
+    if (!response.ok) {
+      throw new Error(typeof payload.message === "string" ? payload.message : "Unable to load session.");
+    }
+
+    clearLegacyAuthStorage();
+    applySessionPayload(payload);
+  } catch {
+    setAuthSnapshot({
+      isReady: true,
+      user: null,
+      session: null,
+    });
+  }
+};
+
+export const initializeAuthState = () => {
+  if (typeof window === "undefined") {
+    return Promise.resolve();
+  }
+
+  if (!authInitializationPromise) {
+    authInitializationPromise = refreshAuthState().finally(() => {
+      authInitializationPromise = null;
+    });
+  }
+
+  return authInitializationPromise;
+};
+
+const mutateAuth = async (
+  input: RequestInfo | URL,
+  init: RequestInit = {}
+): Promise<AuthMutationResult> => {
+  try {
+    const response = await fetch(input, {
+      ...init,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(init.headers ?? {}),
+      },
+      cache: "no-store",
+    });
+    const payload = await readJsonSafely(response);
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        message:
+          typeof payload.message === "string"
+            ? payload.message
+            : "Something went wrong. Please try again.",
+      };
+    }
+
+    clearLegacyAuthStorage();
+    applySessionPayload(payload);
+
+    return {
+      ok: true,
+      message:
+        typeof payload.message === "string"
+          ? payload.message
+          : "Request completed successfully.",
+    };
+  } catch {
+    return {
+      ok: false,
+      message: "Unable to reach the server right now. Please try again.",
+    };
+  }
+};
+
+export const signupWithApi = (payload: SignupPayload) =>
+  mutateAuth("/api/auth/signup", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const loginWithApi = (payload: LoginPayload) =>
+  mutateAuth("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const updateProfileWithApi = (payload: UpdateProfilePayload) =>
+  mutateAuth("/api/auth/profile", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+export const logoutWithApi = () =>
+  mutateAuth("/api/auth/logout", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });

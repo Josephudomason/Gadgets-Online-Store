@@ -34,7 +34,7 @@ const Categories = ({
 
   return (
     <div className="space-y-4">
-      <div className="grid w-full grid-cols-4 gap-4 p-2 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid w-full grid-cols-3 gap-4 p-2 md:grid-cols-4 lg:grid-cols-6">
         {visibleCategories.map((product) => (
           <div
             key={product.Name}

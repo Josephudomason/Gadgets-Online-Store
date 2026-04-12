@@ -12,6 +12,15 @@ footer li:hover {
   color: #6B52F1;
 }
 
+.pristine-logo-glow {
+  transition: filter 200ms ease, transform 200ms ease;
+}
+
+.dark .pristine-logo-glow {
+  filter: brightness(1.18) drop-shadow(0 0 12px rgba(255, 255, 255, 0.35))
+    drop-shadow(0 0 26px rgba(255, 255, 255, 0.22));
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);

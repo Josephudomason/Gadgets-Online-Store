@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   DELIVERY_FEE,
   DISCOUNT_RATE,
+  EMPTY_CART_ITEMS,
   formatPrice,
   parsePrice,
   readCartItems,
@@ -19,7 +20,11 @@ import type { CartItem } from "@/lib/cart";
 
 const Cart = () => {
   const isClient = useSyncExternalStore(subscribeToCart, () => true, () => false);
-  const cartItems = useSyncExternalStore(subscribeToCart, readCartItems, () => []);
+  const cartItems = useSyncExternalStore(
+    subscribeToCart,
+    readCartItems,
+    () => EMPTY_CART_ITEMS
+  );
   const [deselectedItemIds, setDeselectedItemIds] = useState<string[]>([]);
 
   const persistCartItems = (nextCartItems: CartItem[]) => {

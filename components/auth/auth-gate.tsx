@@ -55,20 +55,15 @@ export const AuthGate = ({
 
     if (mode === "signup") {
       if (session) {
-        router.replace("/profile");
+        router.replace(readNextParam() || "/profile");
       }
 
       return;
     }
 
     if (mode === "login") {
-      if (!user) {
-        router.replace(`/signup${nextUrl}`);
-        return;
-      }
-
       if (session) {
-        router.replace("/account");
+        router.replace(readNextParam() || "/account");
       }
     }
   }, [isReady, mode, pathname, router, session, user]);
@@ -91,7 +86,7 @@ export const AuthGate = ({
     return null;
   }
 
-  if (mode === "login" && (!user || session)) {
+  if (mode === "login" && session) {
     return null;
   }
 

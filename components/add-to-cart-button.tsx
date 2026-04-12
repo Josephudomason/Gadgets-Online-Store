@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
-import { addProductToCart } from "@/lib/cart";
+import { addProductToCart, isProductInCart, subscribeToCart } from "@/lib/cart";
 import type { ProductCatalogItem } from "@/lib/productCatalog";
 
 type AddToCartButtonProps = {
@@ -13,8 +13,12 @@ type AddToCartButtonProps = {
 };
 
 const AddToCartButton = ({ product }: AddToCartButtonProps) => {
-  const [isAdded, setIsAdded] = useState(false);
   const { session } = useAuth();
+  const isAdded = useSyncExternalStore(
+    subscribeToCart,
+    () => isProductInCart(product.id),
+    () => false
+  );
   const checkoutHref = useMemo(
     () => (session ? "/checkout" : `/signup?next=${encodeURIComponent("/checkout")}`),
     [session]
@@ -22,7 +26,6 @@ const AddToCartButton = ({ product }: AddToCartButtonProps) => {
 
   const handleAddToCart = () => {
     addProductToCart(product);
-    setIsAdded(true);
   };
 
   return (

@@ -13,6 +13,7 @@ import { NavBar } from "../nav";
 import { AuthGate } from "@/components/auth/auth-gate";
 import { useAuth } from "@/components/providers/auth-provider";
 import {
+  EMPTY_NAVIGATION_TRAIL,
   getNavigationTrailSnapshot,
   subscribeToNavigationTrail,
 } from "@/lib/navigationTrail";
@@ -59,7 +60,7 @@ const PaymentPageContent = () => {
   const trail = useSyncExternalStore(
     subscribeToNavigationTrail,
     getNavigationTrailSnapshot,
-    () => []
+    () => EMPTY_NAVIGATION_TRAIL
   );
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
@@ -116,12 +117,12 @@ const PaymentPageContent = () => {
     };
   }, [isPaymentModalOpen, paymentState, router]);
 
-  const savePhoneNumber = () => {
+  const savePhoneNumber = async () => {
     if (!user) {
       return;
     }
 
-    const result = updateProfile({
+    const result = await updateProfile({
       name: user.name,
       homeAddress: user.homeAddress,
       phoneNumber,
@@ -136,12 +137,12 @@ const PaymentPageContent = () => {
     }
   };
 
-  const saveHomeAddress = () => {
+  const saveHomeAddress = async () => {
     if (!user) {
       return;
     }
 
-    const result = updateProfile({
+    const result = await updateProfile({
       name: user.name,
       homeAddress,
       phoneNumber: user.phoneNumber,

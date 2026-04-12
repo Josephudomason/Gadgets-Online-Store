@@ -78,9 +78,9 @@ export const ProfilePageContent = () => {
 
               <form
                 className="mt-6 grid gap-4 md:grid-cols-2"
-                onSubmit={(event) => {
+                onSubmit={async (event) => {
                   event.preventDefault();
-                  const result = updateProfile(form);
+                  const result = await updateProfile(form);
                   setMessage(result.message);
 
                   if (result.ok) {

@@ -3,17 +3,23 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
 
 import {
-  normalizeEmail,
+  getAuthServerSnapshot,
+  getAuthSnapshot,
+  initializeAuthState,
+  loginWithApi,
   readAuthSession,
   readStoredUser,
+  refreshAuthState,
+  signupWithApi,
   subscribeToAuth,
-  writeAuthSession,
-  writeStoredUser,
+  updateProfileWithApi,
+  logoutWithApi,
   type AuthSession,
   type StoredUser,
 } from "@/lib/auth";
@@ -33,165 +39,46 @@ type LoginPayload = {
   password: string;
 };
 
+type AuthResult = {
+  ok: boolean;
+  message: string;
+};
+
 type AuthContextValue = {
   user: StoredUser | null;
   session: AuthSession | null;
   isReady: boolean;
   isAuthenticated: boolean;
-  signup: (payload: SignupPayload) => { ok: boolean; message: string };
-  login: (payload: LoginPayload) => { ok: boolean; message: string };
-  updateProfile: (payload: Omit<SignupPayload, "email" | "password">) => { ok: boolean; message: string };
-  logout: () => void;
+  signup: (payload: SignupPayload) => Promise<AuthResult>;
+  login: (payload: LoginPayload) => Promise<AuthResult>;
+  refresh: () => Promise<void>;
+  updateProfile: (payload: Omit<SignupPayload, "email" | "password">) => Promise<AuthResult>;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const isReady = useSyncExternalStore(subscribeToAuth, () => true, () => false);
-  const user = useSyncExternalStore(
+  const authState = useSyncExternalStore(
     subscribeToAuth,
-    readStoredUser,
-    () => null
+    getAuthSnapshot,
+    getAuthServerSnapshot
   );
-  const session = useSyncExternalStore(
-    subscribeToAuth,
-    readAuthSession,
-    () => null
-  );
-  const validateProfile = ({
-    name,
-    homeAddress,
-    phoneNumber,
-    gender,
-    age,
-  }: Omit<SignupPayload, "email" | "password">) => {
-    if (!name.trim() || !homeAddress.trim() || !phoneNumber.trim() || !gender.trim()) {
-      return "Please complete all profile fields.";
-    }
+  const user = readStoredUser();
+  const session = readAuthSession();
+  const isReady = authState.isReady;
 
-    const numericAge = Number(age);
+  useEffect(() => {
+    void initializeAuthState();
+  }, []);
 
-    if (!Number.isFinite(numericAge) || numericAge < 18) {
-      return "Users must be at least 18 years old.";
-    }
+  const signup = (payload: SignupPayload) => signupWithApi(payload);
+  const login = (payload: LoginPayload) => loginWithApi(payload);
+  const updateProfile = (payload: Omit<SignupPayload, "email" | "password">) =>
+    updateProfileWithApi(payload);
 
-    return null;
-  };
-
-  const signup = ({
-    name,
-    homeAddress,
-    phoneNumber,
-    gender,
-    age,
-    email,
-    password,
-  }: SignupPayload) => {
-    const profileValidationMessage = validateProfile({
-      name,
-      homeAddress,
-      phoneNumber,
-      gender,
-      age,
-    });
-
-    if (profileValidationMessage) {
-      return { ok: false, message: profileValidationMessage };
-    }
-
-    const normalizedEmail = normalizeEmail(email);
-    const existingUser = readStoredUser();
-
-    if (existingUser && normalizeEmail(existingUser.email) === normalizedEmail) {
-      return { ok: false, message: "An account with this email already exists." };
-    }
-
-    const nextUser: StoredUser = {
-      name: name.trim(),
-      homeAddress: homeAddress.trim(),
-      phoneNumber: phoneNumber.trim(),
-      gender: gender.trim(),
-      age: age.trim(),
-      email: normalizedEmail,
-      password,
-      createdAt: new Date().toISOString(),
-    };
-    const nextSession: AuthSession = {
-      email: normalizedEmail,
-      loggedInAt: new Date().toISOString(),
-    };
-
-    writeStoredUser(nextUser);
-    writeAuthSession(nextSession);
-
-    return { ok: true, message: "Account created successfully." };
-  };
-
-  const login = ({ email, password }: LoginPayload) => {
-    const existingUser = readStoredUser();
-
-    if (!existingUser) {
-      return { ok: false, message: "No account found. Sign up first." };
-    }
-
-    if (
-      normalizeEmail(existingUser.email) !== normalizeEmail(email) ||
-      existingUser.password !== password
-    ) {
-      return { ok: false, message: "Invalid email or password." };
-    }
-
-    const nextSession: AuthSession = {
-      email: existingUser.email,
-      loggedInAt: new Date().toISOString(),
-    };
-
-    writeAuthSession(nextSession);
-
-    return { ok: true, message: "Login successful." };
-  };
-
-  const updateProfile = ({
-    name,
-    homeAddress,
-    phoneNumber,
-    gender,
-    age,
-  }: Omit<SignupPayload, "email" | "password">) => {
-    const profileValidationMessage = validateProfile({
-      name,
-      homeAddress,
-      phoneNumber,
-      gender,
-      age,
-    });
-
-    if (profileValidationMessage) {
-      return { ok: false, message: profileValidationMessage };
-    }
-
-    const existingUser = readStoredUser();
-
-    if (!existingUser) {
-      return { ok: false, message: "No account found to update." };
-    }
-
-    const nextUser: StoredUser = {
-      ...existingUser,
-      name: name.trim(),
-      homeAddress: homeAddress.trim(),
-      phoneNumber: phoneNumber.trim(),
-      gender: gender.trim(),
-      age: age.trim(),
-    };
-
-    writeStoredUser(nextUser);
-
-    return { ok: true, message: "Profile saved." };
-  };
-
-  const logout = () => {
-    writeAuthSession(null);
+  const logout = async () => {
+    await logoutWithApi();
   };
 
   const value = {
@@ -201,6 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticated: Boolean(user && session),
     signup,
     login,
+    refresh: refreshAuthState,
     updateProfile,
     logout,
   };

@@ -274,7 +274,7 @@ export const NavBar = () => {
 
       if (remainingMilliseconds === 0) {
         window.clearInterval(interval);
-        logout();
+        void logout();
         setIsLogoutModalOpen(false);
         setLogoutCountdown(10);
         setLogoutDeadline(null);
@@ -308,7 +308,7 @@ export const NavBar = () => {
                 height={42}
                 sizes="42px"
                 style={{ height: "auto" }}
-                className="w-[42px]"
+                className="pristine-logo-glow w-[42px]"
               />
             </Link>
 
@@ -442,7 +442,7 @@ export const NavBar = () => {
                 height={38}
                 sizes="38px"
                 style={{ height: "auto" }}
-                className="w-[38px]"
+                className="pristine-logo-glow w-[38px]"
               />
             </Link>
 

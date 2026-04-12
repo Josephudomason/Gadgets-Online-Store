@@ -4,6 +4,7 @@ const CART_STORAGE_KEY = "cart-items";
 const CART_STATE_EVENT = "store-cart-change";
 const DELIVERY_FEE = 5000;
 const DISCOUNT_RATE = 0.1;
+const EMPTY_CART_ITEMS: CartItem[] = [];
 
 type CartItem = {
   id: string;
@@ -19,6 +20,9 @@ type CartProduct = Pick<
   ProductCatalogItem,
   "id" | "name" | "image" | "price" | "brand" | "model"
 >;
+
+let cachedCartRaw: string | null | undefined;
+let cachedCartSnapshot: CartItem[] = EMPTY_CART_ITEMS;
 
 const parsePrice = (price: string | null) => {
   if (!price) {
@@ -73,6 +77,18 @@ const normalizeCartItem = (value: unknown): CartItem | null => {
   };
 };
 
+const normalizeCartItems = (value: unknown): CartItem[] => {
+  if (!Array.isArray(value)) {
+    return EMPTY_CART_ITEMS;
+  }
+
+  const normalizedItems = value
+    .map(normalizeCartItem)
+    .filter((item): item is CartItem => item !== null);
+
+  return normalizedItems.length > 0 ? normalizedItems : EMPTY_CART_ITEMS;
+};
+
 const dispatchCartChange = () => {
   if (typeof window === "undefined") {
     return;
@@ -83,28 +99,30 @@ const dispatchCartChange = () => {
 
 const readCartItems = (): CartItem[] => {
   if (typeof window === "undefined") {
-    return [];
+    return EMPTY_CART_ITEMS;
   }
 
   const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
 
+  if (storedCart === cachedCartRaw) {
+    return cachedCartSnapshot;
+  }
+
   if (!storedCart) {
-    return [];
+    cachedCartRaw = null;
+    cachedCartSnapshot = EMPTY_CART_ITEMS;
+    return cachedCartSnapshot;
   }
 
   try {
-    const parsed = JSON.parse(storedCart) as unknown;
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed
-      .map(normalizeCartItem)
-      .filter((item): item is CartItem => item !== null);
+    cachedCartRaw = storedCart;
+    cachedCartSnapshot = normalizeCartItems(JSON.parse(storedCart));
   } catch {
-    return [];
+    cachedCartRaw = storedCart;
+    cachedCartSnapshot = EMPTY_CART_ITEMS;
   }
+
+  return cachedCartSnapshot;
 };
 
 const writeCartItems = (cartItems: CartItem[]) => {
@@ -112,23 +130,27 @@ const writeCartItems = (cartItems: CartItem[]) => {
     return;
   }
 
-  window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+  const nextCartItems = normalizeCartItems(cartItems);
+  const raw = JSON.stringify(nextCartItems);
+
+  window.localStorage.setItem(CART_STORAGE_KEY, raw);
+  cachedCartRaw = raw;
+  cachedCartSnapshot = nextCartItems;
   dispatchCartChange();
 };
 
 const addProductToCart = (product: CartProduct) => {
   const cartItems = readCartItems();
   const existingItem = cartItems.find((item) => item.id === product.id);
+  const nextCartItems = existingItem
+    ? cartItems.map((item) =>
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    : [...cartItems, createCartItem(product)];
 
-  if (existingItem) {
-    existingItem.quantity += 1;
-  } else {
-    cartItems.push(createCartItem(product));
-  }
+  writeCartItems(nextCartItems);
 
-  writeCartItems(cartItems);
-
-  return cartItems;
+  return nextCartItems;
 };
 
 const removeProductFromCart = (productId: string) => {
@@ -157,6 +179,8 @@ const clearCartItems = () => {
   }
 
   window.localStorage.removeItem(CART_STORAGE_KEY);
+  cachedCartRaw = null;
+  cachedCartSnapshot = EMPTY_CART_ITEMS;
   dispatchCartChange();
 };
 
@@ -182,6 +206,7 @@ export {
   createCartItem,
   DELIVERY_FEE,
   DISCOUNT_RATE,
+  EMPTY_CART_ITEMS,
   formatPrice,
   isProductInCart,
   parsePrice,
