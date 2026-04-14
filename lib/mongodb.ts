@@ -27,10 +27,15 @@ if (!globalForMongo._mongo) {
 }
 
 const getMongoUri = () => {
-  const uri = process.env.MONGODB_URI;
+  const uri =
+    process.env.MONGODB_URI ??
+    process.env.MONGODB_URL ??
+    process.env.DATABASE_URL;
 
   if (!uri) {
-    throw new Error("Missing MONGODB_URI environment variable.");
+    throw new Error(
+      "Missing MongoDB connection string. Set MONGODB_URI, MONGODB_URL, or DATABASE_URL."
+    );
   }
 
   return uri;
