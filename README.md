@@ -1,16 +1,5 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Environment Variables
-
-Create a local `.env.local` file from `.env.example` and provide your MongoDB settings:
-
-```bash
-MONGODB_URI=your-mongodb-connection-string
-MONGODB_DB_NAME=store
-```
-
-For Vercel deployments, add the same variables in `Project Settings -> Environment Variables`.
-
 ## Getting Started
 
 First, run the development server:

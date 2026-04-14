@@ -65,7 +65,7 @@ export const AuthShell = ({
             <p className="text-sm font-semibold">What this flow now does</p>
             <ul className="mt-3 space-y-2 text-sm text-white/80">
               <li>New users are sent to sign up first.</li>
-              <li>Sign-up creates a saved profile and active session.</li>
+              <li>Sign-up saves your profile and active session on this device.</li>
               <li>Returning users can log in with the same credentials.</li>
               <li>Authenticated users can continue to checkout or their account.</li>
             </ul>

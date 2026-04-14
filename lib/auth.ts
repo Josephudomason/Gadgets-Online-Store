@@ -1,3 +1,5 @@
+"use client";
+
 export const AUTH_STATE_EVENT = "store-auth-change";
 
 export type StoredUser = {
@@ -43,6 +45,13 @@ type AuthMutationResult = {
   message: string;
 };
 
+type StoredAccountRecord = StoredUser & {
+  password: string;
+  updatedAt: string;
+};
+
+const AUTH_USERS_STORAGE_KEY = "store-auth-users";
+const AUTH_SESSION_STORAGE_KEY = "store-auth-session";
 const INITIAL_AUTH_SNAPSHOT: AuthSnapshot = {
   isReady: false,
   user: null,
@@ -103,10 +112,34 @@ const sanitizeSession = (value: unknown): AuthSession | null => {
   };
 };
 
+const sanitizeStoredAccount = (value: unknown): StoredAccountRecord | null => {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const candidate = value as Partial<StoredAccountRecord>;
+  const user = sanitizeUser(candidate);
+
+  if (!user || typeof candidate.password !== "string") {
+    return null;
+  }
+
+  return {
+    ...user,
+    password: candidate.password,
+    updatedAt:
+      typeof candidate.updatedAt === "string" && candidate.updatedAt
+        ? candidate.updatedAt
+        : user.createdAt,
+  };
+};
+
+const canUseStorage = () => typeof window !== "undefined";
+
 const emitAuthChange = () => {
   listeners.forEach((listener) => listener());
 
-  if (typeof window !== "undefined") {
+  if (canUseStorage()) {
     window.dispatchEvent(new Event(AUTH_STATE_EVENT));
   }
 };
@@ -116,28 +149,114 @@ const setAuthSnapshot = (nextSnapshot: AuthSnapshot) => {
   emitAuthChange();
 };
 
-const clearLegacyAuthStorage = () => {
-  if (typeof window === "undefined") {
+const readJsonFromStorage = (key: string) => {
+  if (!canUseStorage()) {
+    return null;
+  }
+
+  const rawValue = window.localStorage.getItem(key);
+
+  if (!rawValue) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawValue) as unknown;
+  } catch {
+    window.localStorage.removeItem(key);
+    return null;
+  }
+};
+
+const writeJsonToStorage = (key: string, value: unknown) => {
+  if (!canUseStorage()) {
     return;
   }
 
-  window.localStorage.removeItem("store-auth-user");
-  window.localStorage.removeItem("store-auth-session");
+  window.localStorage.setItem(key, JSON.stringify(value));
 };
 
-const readJsonSafely = async (response: Response) => {
-  try {
-    return (await response.json()) as Record<string, unknown>;
-  } catch {
-    return {};
+const readStoredAccounts = () => {
+  const parsed = readJsonFromStorage(AUTH_USERS_STORAGE_KEY);
+
+  if (!Array.isArray(parsed)) {
+    return [];
   }
+
+  return parsed
+    .map((entry) => sanitizeStoredAccount(entry))
+    .filter((entry): entry is StoredAccountRecord => Boolean(entry));
 };
 
-const applySessionPayload = (payload: Record<string, unknown>) => {
+const writeStoredAccounts = (accounts: StoredAccountRecord[]) => {
+  writeJsonToStorage(AUTH_USERS_STORAGE_KEY, accounts);
+};
+
+const readStoredSession = () => sanitizeSession(readJsonFromStorage(AUTH_SESSION_STORAGE_KEY));
+
+const writeStoredSession = (session: AuthSession | null) => {
+  if (!canUseStorage()) {
+    return;
+  }
+
+  if (!session) {
+    window.localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
+    return;
+  }
+
+  writeJsonToStorage(AUTH_SESSION_STORAGE_KEY, session);
+};
+
+const getUserForSession = (session: AuthSession | null) => {
+  if (!session) {
+    return null;
+  }
+
+  const accounts = readStoredAccounts();
+  const account = accounts.find(
+    (candidate) => candidate.email === normalizeEmail(session.email)
+  );
+
+  return account ? sanitizeUser(account) : null;
+};
+
+const validateProfile = ({
+  name,
+  homeAddress,
+  phoneNumber,
+  gender,
+  age,
+}: UpdateProfilePayload) => {
+  if (
+    !name.trim() ||
+    !homeAddress.trim() ||
+    !phoneNumber.trim() ||
+    !gender.trim()
+  ) {
+    return "Please complete all profile fields.";
+  }
+
+  const numericAge = Number(age);
+
+  if (!Number.isFinite(numericAge) || numericAge < 18) {
+    return "Users must be at least 18 years old.";
+  }
+
+  return null;
+};
+
+const syncAuthSnapshotFromStorage = () => {
+  const session = readStoredSession();
+  const user = getUserForSession(session);
+
+  if (session && !user) {
+    writeStoredSession(null);
+  }
+
   setAuthSnapshot({
     isReady: true,
-    user: sanitizeUser(payload.user),
-    session: sanitizeSession(payload.session),
+    user,
+    session: user ? session : null,
   });
 };
 
@@ -149,45 +268,47 @@ export const readAuthSession = () => authSnapshot.session;
 export const subscribeToAuth = (onStoreChange: () => void) => {
   listeners.add(onStoreChange);
 
+  if (canUseStorage()) {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (
+        event.key === null ||
+        event.key === AUTH_USERS_STORAGE_KEY ||
+        event.key === AUTH_SESSION_STORAGE_KEY
+      ) {
+        syncAuthSnapshotFromStorage();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      listeners.delete(onStoreChange);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }
+
   return () => {
     listeners.delete(onStoreChange);
   };
 };
 
 export const refreshAuthState = async () => {
-  if (typeof window === "undefined") {
+  if (!canUseStorage()) {
     return;
   }
 
-  try {
-    const response = await fetch("/api/auth/session", {
-      credentials: "include",
-      cache: "no-store",
-    });
-    const payload = await readJsonSafely(response);
-
-    if (!response.ok) {
-      throw new Error(typeof payload.message === "string" ? payload.message : "Unable to load session.");
-    }
-
-    clearLegacyAuthStorage();
-    applySessionPayload(payload);
-  } catch {
-    setAuthSnapshot({
-      isReady: true,
-      user: null,
-      session: null,
-    });
-  }
+  syncAuthSnapshotFromStorage();
 };
 
 export const initializeAuthState = () => {
-  if (typeof window === "undefined") {
+  if (!canUseStorage()) {
     return Promise.resolve();
   }
 
   if (!authInitializationPromise) {
-    authInitializationPromise = refreshAuthState().finally(() => {
+    authInitializationPromise = Promise.resolve().then(() => {
+      syncAuthSnapshotFromStorage();
+    }).finally(() => {
       authInitializationPromise = null;
     });
   }
@@ -195,70 +316,187 @@ export const initializeAuthState = () => {
   return authInitializationPromise;
 };
 
-const mutateAuth = async (
-  input: RequestInfo | URL,
-  init: RequestInit = {}
+export const signupWithApi = async (
+  payload: SignupPayload
 ): Promise<AuthMutationResult> => {
-  try {
-    const response = await fetch(input, {
-      ...init,
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(init.headers ?? {}),
-      },
-      cache: "no-store",
-    });
-    const payload = await readJsonSafely(response);
-
-    if (!response.ok) {
-      return {
-        ok: false,
-        message:
-          typeof payload.message === "string"
-            ? payload.message
-            : "Something went wrong. Please try again.",
-      };
-    }
-
-    clearLegacyAuthStorage();
-    applySessionPayload(payload);
-
-    return {
-      ok: true,
-      message:
-        typeof payload.message === "string"
-          ? payload.message
-          : "Request completed successfully.",
-    };
-  } catch {
+  if (!canUseStorage()) {
     return {
       ok: false,
-      message: "Unable to reach the server right now. Please try again.",
+      message: "Account storage is only available in the browser.",
     };
   }
+
+  const profileValidationMessage = validateProfile(payload);
+
+  if (profileValidationMessage) {
+    return { ok: false, message: profileValidationMessage };
+  }
+
+  const email = normalizeEmail(payload.email);
+
+  if (!email) {
+    return { ok: false, message: "Please enter a valid email address." };
+  }
+
+  if (payload.password.trim().length < 6) {
+    return {
+      ok: false,
+      message: "Password must be at least 6 characters long.",
+    };
+  }
+
+  const accounts = readStoredAccounts();
+  const existingUser = accounts.find((account) => account.email === email);
+
+  if (existingUser) {
+    return {
+      ok: false,
+      message: "An account with this email already exists.",
+    };
+  }
+
+  const now = new Date().toISOString();
+  const account: StoredAccountRecord = {
+    name: payload.name.trim(),
+    homeAddress: payload.homeAddress.trim(),
+    phoneNumber: payload.phoneNumber.trim(),
+    gender: payload.gender.trim(),
+    age: payload.age.trim(),
+    email,
+    createdAt: now,
+    updatedAt: now,
+    password: payload.password,
+  };
+
+  accounts.push(account);
+  writeStoredAccounts(accounts);
+
+  const session: AuthSession = {
+    email,
+    loggedInAt: now,
+  };
+
+  writeStoredSession(session);
+  syncAuthSnapshotFromStorage();
+
+  return {
+    ok: true,
+    message: "Account created successfully.",
+  };
 };
 
-export const signupWithApi = (payload: SignupPayload) =>
-  mutateAuth("/api/auth/signup", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+export const loginWithApi = async (
+  payload: LoginPayload
+): Promise<AuthMutationResult> => {
+  if (!canUseStorage()) {
+    return {
+      ok: false,
+      message: "Account storage is only available in the browser.",
+    };
+  }
 
-export const loginWithApi = (payload: LoginPayload) =>
-  mutateAuth("/api/auth/login", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  const email = normalizeEmail(payload.email);
+  const password = payload.password.trim();
+  const accounts = readStoredAccounts();
+  const account = accounts.find((candidate) => candidate.email === email);
 
-export const updateProfileWithApi = (payload: UpdateProfilePayload) =>
-  mutateAuth("/api/auth/profile", {
-    method: "PATCH",
-    body: JSON.stringify(payload),
-  });
+  if (!account) {
+    return {
+      ok: false,
+      message: "No account found. Sign up first.",
+    };
+  }
 
-export const logoutWithApi = () =>
-  mutateAuth("/api/auth/logout", {
-    method: "POST",
-    body: JSON.stringify({}),
+  if (account.password !== password) {
+    return {
+      ok: false,
+      message: "Invalid email or password.",
+    };
+  }
+
+  writeStoredSession({
+    email,
+    loggedInAt: new Date().toISOString(),
   });
+  syncAuthSnapshotFromStorage();
+
+  return {
+    ok: true,
+    message: "Login successful.",
+  };
+};
+
+export const updateProfileWithApi = async (
+  payload: UpdateProfilePayload
+): Promise<AuthMutationResult> => {
+  if (!canUseStorage()) {
+    return {
+      ok: false,
+      message: "Account storage is only available in the browser.",
+    };
+  }
+
+  const profileValidationMessage = validateProfile(payload);
+
+  if (profileValidationMessage) {
+    return { ok: false, message: profileValidationMessage };
+  }
+
+  const session = readStoredSession();
+
+  if (!session) {
+    return {
+      ok: false,
+      message: "Please log in to update your profile.",
+    };
+  }
+
+  const accounts = readStoredAccounts();
+  const accountIndex = accounts.findIndex(
+    (account) => account.email === normalizeEmail(session.email)
+  );
+
+  if (accountIndex === -1) {
+    writeStoredSession(null);
+    syncAuthSnapshotFromStorage();
+    return {
+      ok: false,
+      message: "Your session has expired. Please log in again.",
+    };
+  }
+
+  accounts[accountIndex] = {
+    ...accounts[accountIndex],
+    name: payload.name.trim(),
+    homeAddress: payload.homeAddress.trim(),
+    phoneNumber: payload.phoneNumber.trim(),
+    gender: payload.gender.trim(),
+    age: payload.age.trim(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  writeStoredAccounts(accounts);
+  syncAuthSnapshotFromStorage();
+
+  return {
+    ok: true,
+    message: "Profile saved.",
+  };
+};
+
+export const logoutWithApi = async (): Promise<AuthMutationResult> => {
+  if (!canUseStorage()) {
+    return {
+      ok: false,
+      message: "Account storage is only available in the browser.",
+    };
+  }
+
+  writeStoredSession(null);
+  syncAuthSnapshotFromStorage();
+
+  return {
+    ok: true,
+    message: "Logged out successfully.",
+  };
+};

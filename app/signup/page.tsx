@@ -43,7 +43,7 @@ const SignupPage = () => {
       <AuthGate mode="signup">
         <AuthShell
           heading="Create your store account"
-          description="Create your account once and we will save your profile details securely so checkout and account access keep working across the app."
+          description="Create your account once and we will save your profile details on this device so checkout and account access keep working across the app."
           activeHref="/signup"
         >
           <div>
