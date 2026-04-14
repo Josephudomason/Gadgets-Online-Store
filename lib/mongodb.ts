@@ -1,11 +1,5 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 
-const uri = process.env.MONGODB_URI;
-
-if (!uri) {
-  throw new Error("Missing MONGODB_URI environment variable.");
-}
-
 const options = {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -32,13 +26,23 @@ if (!globalForMongo._mongo) {
   globalForMongo._mongo = mongoCache;
 }
 
+const getMongoUri = () => {
+  const uri = process.env.MONGODB_URI;
+
+  if (!uri) {
+    throw new Error("Missing MONGODB_URI environment variable.");
+  }
+
+  return uri;
+};
+
 export const getMongoClient = async () => {
   if (mongoCache.client) {
     return mongoCache.client;
   }
 
   if (!mongoCache.promise) {
-    mongoCache.promise = new MongoClient(uri, options).connect();
+    mongoCache.promise = new MongoClient(getMongoUri(), options).connect();
   }
 
   mongoCache.client = await mongoCache.promise;
